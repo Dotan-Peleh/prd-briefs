@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Brief — Scissors Booster PRD</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✂️</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f8f8f6;
+    --surface: #ffffff;
+    --text: #1a1a1a;
+    --text-secondary: #6b6b6b;
+    --text-muted: #9a9a9a;
+    --accent: #d94452;
+    --accent-soft: #fef2f2;
+    --user-bg: #1a1a2e;
+    --user-text: #f0f0f5;
+    --border: #e8e8e4;
+    --border-light: #f0f0ec;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 2px 8px rgba(0,0,0,0.06);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --radius-pill: 100px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg); color: var(--text);
+    height: 100vh; display: flex; flex-direction: column;
+    overflow: hidden; -webkit-font-smoothing: antialiased;
+  }
+  .header {
+    padding: 18px 28px; background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 14px; flex-shrink: 0; z-index: 10;
+  }
+  .header-icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #2d2d5e 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0; box-shadow: var(--shadow-md);
+  }
+  .header-brand {
+    font-family: 'Newsreader', serif; font-size: 18px; font-weight: 600;
+    color: var(--text); letter-spacing: -0.3px;
+  }
+  .header-brand em {
+    font-style: italic; color: var(--accent); font-weight: 400;
+  }
+  .header-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; letter-spacing: 0.2px; }
+  .header-status {
+    margin-left: auto; display: flex; align-items: center; gap: 6px;
+    font-size: 10px; color: var(--text-muted); letter-spacing: 0.4px; text-transform: uppercase;
+  }
+  .header-status .pulse {
+    width: 6px; height: 6px; border-radius: 50%; background: #22c55e;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.85); }
+  }
+  .chat {
+    flex: 1; overflow-y: auto; padding: 24px 28px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .chat::-webkit-scrollbar { width: 5px; }
+  .chat::-webkit-scrollbar-track { background: transparent; }
+  .chat::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .msg-group {
+    display: flex; gap: 10px; max-width: 88%;
+    animation: msgIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .msg-group.user { align-self: flex-end; flex-direction: row-reverse; }
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .msg-avatar {
+    width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; margin-top: 2px;
+  }
+  .msg-group.ai .msg-avatar {
+    background: linear-gradient(135deg, #1a1a2e, #3d3d7e);
+    color: white; box-shadow: var(--shadow-sm);
+  }
+  .msg-group.user .msg-avatar { background: var(--user-bg); color: var(--user-text); }
+  .msg-content {
+    padding: 13px 17px; border-radius: var(--radius);
+    line-height: 1.65; font-size: 13.5px;
+  }
+  .msg-group.ai .msg-content {
+    background: var(--surface); color: var(--text);
+    border: 1px solid var(--border-light); box-shadow: var(--shadow-sm);
+    border-top-left-radius: 4px;
+  }
+  .msg-group.user .msg-content {
+    background: var(--user-bg); color: var(--user-text);
+    border-top-right-radius: 4px;
+  }
+  .msg-group.ai .msg-content strong { color: var(--accent); font-weight: 600; }
+  .msg-group.ai .msg-content code {
+    background: #f5f5f0; padding: 1px 6px; border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: #8b5cf6; border: 1px solid var(--border-light);
+  }
+  .msg-group.ai .msg-content pre {
+    background: #fafaf8; padding: 12px 14px; border-radius: var(--radius-sm);
+    margin: 8px 0; overflow-x: auto; border: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace; font-size: 11.5px;
+    line-height: 1.7; color: var(--text);
+  }
+  .msg-group.ai .msg-content h3 {
+    font-family: 'Newsreader', serif; color: var(--text);
+    margin: 12px 0 5px; font-size: 14.5px; font-weight: 600;
+  }
+  .msg-group.ai .msg-content h3:first-child { margin-top: 0; }
+  .msg-group.ai .msg-content ul, .msg-group.ai .msg-content ol { padding-left: 18px; margin: 5px 0; }
+  .msg-group.ai .msg-content li { margin: 2px 0; }
+  .msg-group.ai .msg-content p { margin: 5px 0; }
+  .msg-group.ai .msg-content p:first-child { margin-top: 0; }
+  .msg-group.ai .msg-content p:last-child { margin-bottom: 0; }
+  .msg-group.ai .msg-content a {
+    color: var(--accent); text-decoration: none;
+    border-bottom: 1px solid rgba(217,68,82,0.3);
+    transition: border-color 0.2s;
+  }
+  .msg-group.ai .msg-content a:hover { border-bottom-color: var(--accent); }
+  .typing-indicator {
+    display: flex; gap: 10px; max-width: 88%;
+    animation: msgIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .typing-dots {
+    padding: 14px 18px; background: var(--surface);
+    border: 1px solid var(--border-light); border-radius: var(--radius);
+    border-top-left-radius: 4px; box-shadow: var(--shadow-sm);
+    display: flex; gap: 5px; align-items: center;
+  }
+  .typing-dots span {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--text-muted); animation: bounce 1.2s ease-in-out infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-5px); opacity: 1; }
+  }
+  .examples-section { padding: 0 28px 18px; flex-shrink: 0; }
+  .examples-label {
+    font-size: 10px; color: var(--text-muted); text-transform: uppercase;
+    letter-spacing: 0.8px; margin-bottom: 9px; font-weight: 500;
+  }
+  .examples { display: flex; gap: 7px; flex-wrap: wrap; }
+  .example-pill {
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text-secondary); border-radius: var(--radius-pill);
+    padding: 8px 16px; font-size: 12.5px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+  }
+  .example-pill:hover {
+    border-color: var(--accent); color: var(--accent);
+    background: var(--accent-soft); transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+  .input-area {
+    padding: 16px 28px 20px; background: var(--surface);
+    border-top: 1px solid var(--border); flex-shrink: 0;
+  }
+  .input-wrapper {
+    display: flex; gap: 10px; align-items: flex-end;
+    background: var(--bg); border: 1.5px solid var(--border);
+    border-radius: var(--radius); padding: 5px 5px 5px 15px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .input-wrapper:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(217,68,82,0.08); }
+  .input-wrapper textarea {
+    flex: 1; background: transparent; border: none; padding: 9px 0;
+    color: var(--text); font-size: 13.5px; resize: none; height: 40px;
+    max-height: 120px; font-family: 'DM Sans', sans-serif; line-height: 1.5;
+  }
+  .input-wrapper textarea:focus { outline: none; }
+  .input-wrapper textarea::placeholder { color: var(--text-muted); }
+  .send-btn {
+    background: var(--user-bg); color: white; border: none;
+    border-radius: var(--radius-sm); width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0; transition: all 0.2s ease;
+  }
+  .send-btn:hover { background: #2a2a4e; transform: scale(1.05); }
+  .send-btn:disabled { background: var(--border); cursor: not-allowed; transform: none; }
+  .send-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .welcome { text-align: center; padding: 32px 20px 16px; animation: fadeIn 0.5s ease both; }
+  .welcome-emoji { font-size: 32px; margin-bottom: 10px; }
+  .welcome h2 { font-family: 'Newsreader', serif; font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .welcome h2 em { font-style: italic; color: var(--accent); font-weight: 400; }
+  .welcome p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; max-width: 400px; margin: 0 auto; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  @media (max-width: 600px) {
+    .header { padding: 14px 18px; }
+    .chat { padding: 18px; }
+    .examples-section { padding: 0 18px 14px; }
+    .input-area { padding: 12px 18px 16px; }
+    .msg-group { max-width: 94%; }
+    .msg-avatar { width: 26px; height: 26px; font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-icon">&#x2702;&#xFE0F;</div>
+  <div>
+    <div class="header-brand">The Brief <em>by PeerPlay</em></div>
+    <div class="header-sub">Scissors Booster PRD &middot; Scissors Booster</div>
+  </div>
+  <div class="header-status"><div class="pulse"></div>Online</div>
+</div>
+<div id="chat" class="chat">
+  <div class="welcome" id="welcome">
+    <div class="welcome-emoji">&#x2702;&#xFE0F;</div>
+    <h2>The Brief</h2>
+    <p>Ask anything about the Scissors Booster PRD and get instant answers.</p>
+  </div>
+</div>
+<div class="examples-section" id="examples-section">
+  <div class="examples-label">Try asking</div>
+  <div class="examples">
+    <button class="example-pill" onclick="askExample(this)">How does the cut animation work?</button>
+    <button class="example-pill" onclick="askExample(this)">What are the invalid targets?</button>
+    <button class="example-pill" onclick="askExample(this)">How does the confirmation popup work?</button>
+    <button class="example-pill" onclick="askExample(this)">What happens when the board is full?</button>
+    <button class="example-pill" onclick="askExample(this)">Walk me through the FTUE flow</button>
+  </div>
+</div>
+<div class="input-area">
+  <div class="input-wrapper">
+    <textarea id="input" placeholder="Ask anything about the Scissors Booster PRD..." rows="1"
+      oninput="this.style.height='40px';this.style.height=Math.min(this.scrollHeight,120)+'px'"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send()}"></textarea>
+    <button class="send-btn" id="send-btn" onclick="send()">
+      <svg viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
+    </button>
+  </div>
+</div>
+<script>
+const _e="Pg5fBgs3XxQZGlVwQQpELTgXPDIGb0RldFZFDhx0FhoYHDElBjtBVREuEzZBeVsEel1ELyovCgE4AAAtWDkFXSokEzNeZkh4fSE4Vw4BNzsRISsgXQMUCDsDLFZxW3hZCVAFSj85ICInBCQC";
+const _k="MergeCruiseCloudSave2026";
+function _d(e,k){const b=atob(e);let r='';for(let i=0;i<b.length;i++)r+=String.fromCharCode(b.charCodeAt(i)^k.charCodeAt(i%k.length));return r;}
+
+const PRD_URL="https://www.notion.so/33dc2344a7dc8139a8b1e055ba901cf9";
+const PRD=`# Scissors Booster \u2014 PRD
+
+Status: Draft (reviewed) | Version: 3.0 | Date: 2026-04-09 | Author: Product Team
+Feature Type: Utility/Boost + Board + Purchase | Prototype: Interactive Demo (https://split-reclaim-magic.lovable.app)
+
+---
+
+# 1. Background & Context
+
+Users frequently over-merge items past needed levels with no recovery path. This is the #1 frustration reported in merge-related support tickets. Scissors introduce a reverse-merge mechanic \u2014 drag scissors onto a merged item to split it into lower-level items.
+
+Two variants create a natural monetization ladder:
+
+| Variant | Output | Acquisition |
+|---------|--------|-------------|
+| Scissors (Regular) | 2x items, one level lower | Gameplay, store, events |
+| Rainbow Scissors (Premium) | 3x items, one level lower | Store, events, premium rewards |
+
+This is the first "item manipulation" booster in Merge Cruise. It extends the existing booster infrastructure with minimal incremental cost.
+
+---
+
+# 2. MIAMI Framework
+
+## 2.1 Motivations
+
+Primary: Eliminate the #1 user frustration \u2014 accidental over-merges with no recovery.
+Secondary: Open a new monetization vector via a two-tier booster (regular vs. premium Rainbow).
+
+Supporting:
+- Reduce churn from frustrated users who over-merge
+- Add strategic depth to board management
+- Differentiate Merge Cruise from competitors (first-to-market reverse-merge)
+- Foundation for future "item manipulation" features
+
+## 2.2 Success Metrics
+
+| Goal | Metric | Target | Timeframe |
+|------|--------|--------|-----------|
+| Reduce frustration | Support tickets re: merging | -30% | 8 weeks |
+| Drive engagement | Scissors usage rate | >15% of DAU | 4 weeks |
+| Revenue | Rainbow Scissors ARPDAU | +\$0.02 | 8 weeks |
+| Game balance | Item economy inflation | <5% increase | Ongoing |
+
+## 2.3 Illustration
+
+User has a Level 5 Flower on the board but needs Level 4 Flowers for a board task. They drag Regular Scissors onto the L5 Flower \u2192 it splits into 2x L4 Flowers placed on adjacent tiles. Problem solved.
+
+## 2.4 Key Risks
+
+- Economy inflation: Rainbow Scissors create a net +2 items per use. Must control acquisition rates.
+- Exploit loops: Rapid cut \u2192 merge \u2192 cut cycles. Mitigated via configurable rate limiting.
+- Existing booster cannibalization: Monitor store conversion for other boosters post-launch.
+- Board congestion: 3 items from Rainbow could crowd board. RC overflow handles this.
+
+## 2.5 Integrations
+
+- Board system (item placement, tile states, generators)
+- Reward Center (overflow destination)
+- Store / Purchase system (IAP for Rainbow)
+- Booster framework (StoreItemType enum)
+- FTUE system (tutorial on first encounter)
+- Popup priority queue
+- LiveOps config (A/B testing, segmentation)
+- Analytics framework (BI events)
+- UiLockManager (lock during cut animation)
+
+## 2.6 Innovation
+
+- First reverse-merge mechanic in the merge game genre
+- Two-tier booster creates natural upsell path
+- Foundation for future item manipulation features (precision cut, chain cutting)
+
+---
+
+# 3. Goals
+
+Product: Recovery from accidental over-merges, new strategic layer
+Technical: Extend booster framework, atomic cut operations, <16ms validation
+LiveOps: Configurable drop rates per segment, A/B testable acquisition
+Stability: Zero desync on cut operations, atomic rollback on failure
+
+### Guardrail Metrics
+- Economy health: item inflation rate <5% weekly
+- Session length: must not decrease
+- Merge rate: must not significantly decrease
+- Existing booster sales: must not cannibalize
+
+---
+
+# 4. MVP Scope & Roadmap
+
+MVP (Phase 1): Regular + Rainbow Scissors, core cut mechanic, board placement with BFS spiral, RC overflow, cut animation, FTUE, store, analytics, remote config, kill switch
+
+Phase 2: Scissors merging (2x Regular \u2192 1x Rainbow), generator drops, advanced animations, accessibility, localization
+
+Phase 3 (Future): Themed scissors (holiday variants), precision cut, multi-cut, chain cutting, scissors events
+
+---
+
+# 5. Core Concepts & Terminology
+
+| Term | Definition | Game Equivalent |
+|------|-----------|-----------------|
+| Cut | Splitting a higher-level item into lower-level items | Reverse of merge operation |
+| BFS Spiral | Breadth-first search expanding from target to find empty tiles | Same pattern used by generator item placement |
+| Rainbow Scissors | Premium variant producing 3x items instead of 2x | Premium booster tier (like golden boosters) |
+
+---
+
+# 6. Feature Mechanics
+
+## 6.1 Item Definitions
+
+ACTION REQUIRED: Integer item IDs must be assigned from the item catalog before implementation. Placeholder IDs below need confirmation from the content team.
+
+| Property | Regular Scissors | Rainbow Scissors |
+|----------|-----------------|------------------|
+| Item ID | TBD (needs integer from catalog) | TBD (needs integer from catalog) |
+| Item Type | Booster (StoreItemType.Scissors) | Booster (StoreItemType.ScissorsRainbow) |
+| Output Count | 2 | 3 |
+| Output Level | target_level - 1 | target_level - 1 |
+| Output Chain | Same as target | Same as target |
+| Consumed on Use | Yes | Yes |
+| Phase 2: Merge | 2x Regular \u2192 1x Rainbow | N/A (max tier) |
+
+## 6.2 Target Validation
+
+### Valid Targets
+- Merge chain items at Level \u2265 2
+- Recipe output items at Level \u2265 2 (outputs same chain, NOT original ingredients)
+- Max-level items (always valid if level \u2265 2)
+
+### Invalid Targets
+
+| Category | Reason | Error Message |
+|----------|--------|---------------|
+| Level 1 items | No lower level exists | "Cannot cut \u2014 already at minimum level" |
+| Generators | Not merge chain items | "Cannot cut generators" |
+| Other boosters | Utility items | "Cannot cut boosters" |
+| Locked/Chained/Bubbled/Fogged | Must resolve state first | "Unlock/Break/Pop/Reveal first" |
+| Currency, Energy, Stickers | Not mergeable items | "Cannot cut this item" |
+| Items mid-animation | Temporarily locked | "Wait for item to settle" |
+| Milestone tokens (Flowers/Recipes) | Special consume-on-tap behavior | "Cannot cut event tokens" |
+
+## 6.3 Output Placement Algorithm
+
+1. Target tile \u2014 always available after item removal
+2. Adjacent tiles \u2014 up/down/left/right, then diagonals (BFS spiral)
+3. Expanding spiral \u2014 BFS outward from target
+4. Reward Center \u2014 overflow destination (tap-to-collect, fly animation)
+5. Block action \u2014 if Reward Center also full, show toast: "No space \u2014 clear board or Reward Center first"
+
+## 6.4 Board Space Scenarios
+
+| Scenario | Regular (2 items) | Rainbow (3 items) |
+|----------|-------------------|-------------------|
+| Target + 1+ adjacent free | All on board | All on board (if 2+ adjacent) |
+| Target tile only | 1 board, 1 RC | 1 board, 2 RC |
+| No tiles free | Both to RC | All 3 to RC |
+| RC also full | Action blocked | Action blocked |
+
+---
+
+# 7. Board Integration
+
+## 7.1 Board Grid
+Scissors operates on the standard 7x9 board grid. No grid modifications needed.
+
+## 7.2 Board Modes
+Scissors behavior is identical across all 3 board modes. Mode-dependent differences (GeneratorTapCost, DropPerRecharge) do not affect cut mechanics.
+
+Phase 2 Note: If scissors drop from generators, the drop rate should be mode-configurable via DropPerRecharge settings.
+
+## 7.3 Tile States
+- Normal tiles: Valid for output placement
+- SemiLocked tiles: Cannot place output here; skip in BFS
+- Locked tiles: Cannot place output here; skip in BFS
+- Items in locked/semi-locked states are invalid cut targets
+
+## 7.4 Board Full Handling (Rule B6)
+If the board has fewer empty tiles than output count:
+- Place as many as possible on board
+- Overflow items sent to Reward Center with fly animation
+- If RC also full \u2192 block action entirely, scissors return to inventory
+- Track free_tiles on all cut analytics events
+
+## 7.5 Board Task Interaction
+Edge case: If a board task requires a Level 5 item and the user cuts it to 2x Level 4, the task can no longer be completed with those items. This is intentional \u2014 scissors are a strategic choice with consequences. The invalid target system does NOT prevent cutting task-required items.
+
+---
+
+# 8. LiveOps Configuration
+
+## 8.1 Config Type
+EntityConfigType: ScissorsBoosterConfigData
+ConfigId: [assigned per instance]
+ConfigTag: "default" (or segment variant tag)
+
+## 8.2 Triggers
+Scissors activation uses standard LiveOpsTriggerData (OR logic \u2014 any trigger activates):
+
+| Trigger | Condition | Notes |
+|---------|-----------|-------|
+| Chapter gate | chapter \u2265 5 | Configurable via scissors_player_level_gate |
+| Feature flag | Enabled = true | Kill switch: set Enabled = false |
+
+## 8.3 LiveOpsData Fields
+
+| Field | Value |
+|-------|-------|
+| Enabled | true (false = kill switch) |
+| Repeatable | N/A (permanent feature, not time-limited) |
+| Recompletable | N/A |
+| HasNoBadge | true (scissors live in booster inventory, not lobby badge) |
+| Priority | N/A (no lobby badge competition) |
+
+## 8.4 Remote Config Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| scissors_regular_output_count | int | 2 | Items produced by regular scissors |
+| scissors_rainbow_output_count | int | 3 | Items produced by rainbow scissors |
+| scissors_min_target_level | int | 2 | Minimum level that can be cut |
+| scissors_daily_limit | int | -1 | -1 = unlimited. Set if economy issues arise. |
+| scissors_allow_during_events | bool | true | Can scissors be used during LiveOps events |
+
+---
+
+# 9. Segmentation & A/B Testing
+
+## 9.1 Segment Source
+Scissors uses Feature Flag segmentation via UserSegmentation in server response. segment_id on all scissors-related events.
+
+## 9.2 Segmentable Fields
+
+| Field | Why |
+|-------|-----|
+| scissors_enabled | Control group vs. treatment |
+| scissors_regular_output_count | Test 2 vs. 3 output for regular |
+| scissors_rainbow_output_count | Test 3 vs. 4 output for premium |
+| scissors_acquisition_rate | Low vs. medium vs. high drop rates |
+| scissors_store_price | Price point testing per store tier |
+
+## 9.3 A/B Test Plan
+
+Test 1: Core Feature Impact
+- Control: No scissors | A: Regular only | B: Regular + Rainbow
+- Metrics: D7 retention, session length, revenue, merge rate
+
+Test 2: Acquisition Rate
+- Control: Low (events only) | A: Medium (+ store) | B: High (+ generators)
+- Metrics: Usage rate, economy health, monetization
+
+## 9.4 Store Tier Impact
+Rainbow Scissors purchases contribute to the comfort zone calculation (weighted avg, 90-day lookback). This affects store tier assignment (store_1..store_10). Monitor tier migration post-launch.
+
+---
+
+# 10. State Machine
+
+States: IDLE \u2192 DRAGGING \u2192 VALIDATING \u2192 EXECUTING \u2192 PLACING \u2192 COMPLETED
+Alternative paths: VALIDATING \u2192 REJECTED \u2192 IDLE, PLACING \u2192 BLOCKED \u2192 IDLE
+
+User picks up scissors \u2192 DRAGGING
+Drop on empty space (cancel) \u2192 IDLE
+Drop on target \u2192 VALIDATING
+Valid target \u2192 EXECUTING
+Invalid target \u2192 REJECTED \u2192 IDLE (return scissors to inventory)
+Cut animation complete \u2192 PLACING
+Items placed \u2192 COMPLETED \u2192 IDLE
+No space (board + RC full) \u2192 BLOCKED \u2192 IDLE (revert cut, return scissors)
+
+### State Guarantees (Rules SM1-SM4)
+- No skipped states: Every transition is sequential and deterministic
+- Safe interruption: If a LiveOps event timer expires mid-cut, finish the current cut THEN process the event end
+- No desync: Cut operation is atomic \u2014 server-validated, rollback on failure
+- Idempotent: Double-tap prevention via 100ms debounce
+- No undo: Cut is permanent. Scissors consumed = decision has weight.
+
+---
+
+# 11. Full User Flow
+
+## 11.0 Overview
+
+1. Scissors appear on board \u2192 Section 11.1
+2. FTUE (first encounter only) \u2192 Section 11.2
+3. User drags scissors \u2192 Section 11.3
+4. Drop on valid target \u2192 Confirmation popup \u2192 Section 11.4
+5. Cut execution \u2192 Section 11.5
+6. Output placement \u2192 Section 11.6
+7. Completion \u2192 Section 11.7
+
+## 11.1 Scissors Appear on Board
+
+Trigger: User acquires scissors (store purchase, event reward, milestone reward, gift)
+
+What happens:
+- Scissors item spawns on the board using standard BFS spiral placement from a reference point
+- If board is full \u2192 scissors go to Reward Center
+- Scissors are a board item \u2014 they occupy a tile like any other item
+- Visual: scissors icon with "x2" badge (regular) or "x3" gold badge + rainbow glow (premium)
+
+Analytics: rewards_scissors or rewards_store (with package_type: "scissors")
+
+## 11.2 FTUE (First Encounter)
+
+Trigger: First time scissors appear on the user's board AND ftue_scissors_completed = false
+Preconditions: Board is visible, no other FTUE active, no popup queue conflict
+Flow: See Section 13 (FTUE) for full 6-step tutorial
+Exit: Sets ftue_scissors_completed = true. User returns to normal board state.
+Analytics: impression_ftue_scissors_step_N + click_ftue_scissors_step_N per step
+
+## 11.3 User Drags Scissors
+
+Trigger: User taps and holds scissors item on the board
+
+What the user sees:
+- Scissors lift with pop animation (scale 1.0 \u2192 1.1)
+- Audio: metallic clink
+- Board enters "targeting mode"
+
+Target highlighting (real-time as user drags):
+
+| Hover over | Visual | Audio |
+|-----------|--------|-------|
+| Valid target (L2+ merge chain item) | Green pulsing glow + tooltip: "Cut L5 \u2192 2x L4" | Soft chime |
+| Invalid target (L1, generator, booster, etc.) | Red ring + shake + error message | Soft thud |
+| Empty tile | Tile highlights (neutral) | None |
+| Off-board area | Scissors dim slightly | None |
+
+UI Lock: Board items cannot be merged/generated while scissors are being dragged. UiLockManager reason: "scissors_dragging"
+
+## 11.4 Drop on Valid Target \u2192 Confirmation Popup
+
+Trigger: User releases scissors over a valid target item (L2+ merge chain)
+Preconditions: Target passed validation (Section 6.2), board not in animation state
+
+Confirmation Popup appears:
+
+| Element | Content |
+|---------|---------|
+| Icon | Scissors (large, centered) |
+| Title | "Are you sure?" |
+| Preview | Visual: [L5 item] \u2192 [2x L4 items] (or 3x for Rainbow) |
+| Description | "Cut 1x L5 Flower into 2x L4 Flowers" |
+| Warning | "This action cannot be undone" (coral/red text) |
+| Confirm button | "Cut it!" (blue, primary) |
+| Cancel button | "Cancel" (gray, secondary) |
+| Footer | "You have N [type] Scissors remaining" (subtle gray) |
+
+IF user taps "Cut it!": Proceed to Section 11.5 (Execute Cut)
+IF user taps "Cancel": Scissors return to their original tile. No scissors consumed. Back to IDLE.
+
+Analytics: impression_scissors_confirmation (click_id), then click_scissors_confirm or click_scissors_cancel
+
+## 11.5 Cut Execution
+
+Trigger: User confirmed cut in Section 11.4
+
+System operations (atomic):
+1. Consume 1x scissors from user inventory
+2. Remove target item from board
+3. Generate output items (2x for regular, 3x for rainbow) at target_level - 1, same chain
+4. Server validates operation
+
+Animation sequence (800ms total):
+- 0ms: Scissors snap to target center, target freezes
+- 100ms: Scissors "close" animation, diagonal slash across target, micro-shake
+- 300ms: Target dissolves with particle burst, output items emerge from center
+- 600ms: Items animate to final positions (board tiles: slide + pop-in; RC: arc trajectory)
+- 800ms: Items settle with bounce + sparkle. UI updates.
+
+UI Lock: All board interaction locked during animation. Reason: "scissors_cut_animation"
+
+Analytics: click_scissors_cut with full params (scissors_type, target_item_id, target_item_level, output_count, items_on_board, items_to_rc, free_tiles)
+
+IF server validation fails: Atomic rollback, scissors returned, toast: "Something went wrong"
+
+## 11.6 Output Placement
+
+Trigger: Cut animation complete (800ms)
+Placement algorithm: See Section 6.3 (BFS spiral)
+
+| Scenario | Behavior | User sees |
+|----------|----------|-----------|
+| Enough empty tiles | All items placed on board | Items pop into adjacent tiles with sparkle |
+| Some tiles, not enough | Partial board + overflow to RC | Some items on board, rest arc to Reward Center with "Items sent to Reward Center" toast |
+| No tiles AND RC full | Action blocked, cut reverted | Scissors return, toast: "No space \u2014 clear board or Reward Center first" |
+
+## 11.7 Completion
+
+Trigger: All output items placed (board or RC)
+
+What happens:
+- Scissors count in toolbar updates (e.g., x3 \u2192 x2)
+- Board task progress re-evaluates (if output items match a task requirement, progress updates)
+- Brief success banner: "Cut complete!" (fades after 2s)
+- Board returns to IDLE state
+- UiLockManager releases all scissors locks
+
+## 11.8 Alternative Flows
+
+Drop on empty tile: Scissors move to that tile (standard board item drag behavior). No cut, no scissors consumed.
+Drop on invalid target: Swap animation (scissors and target exchange positions) OR scissors return to original tile + red ring + shake + error message. No scissors consumed.
+Drop off-board: Cancel. Scissors return to original tile with snap-back animation.
+
+Analytics: impression_scissors_invalid_target with reason param
+
+---
+
+# 12. Popup Integration
+
+## 12.1 GamePopupType Enum Entries
+
+| Popup | Proposed ID | Trigger | Dismissal |
+|-------|-------------|---------|-----------|
+| ScissorsTutorialPopup | 1150 | First scissors encounter | Step completion |
+| ScissorsStorePopup | 1151 | "Get More" CTA in inventory | Close button or purchase |
+
+## 12.2 Priority Hierarchy
+Scissors popups sit at Feature level:
+Critical > LiveOps > FTUE > Scissors Tutorial > Feature > Secondary
+ScissorsStorePopup must wait for PurchaseLogicInitialized before showing (Rule P3).
+
+---
+
+# 13. FTUE
+
+## 13.1 Level
+Feature-level FTUE (once per type, not framework-level). Shown on first scissors encounter.
+
+## 13.2 Completion Flag
+ftue_scissors_completed \u2014 set to true after tutorial completion.
+
+## 13.3 Tutorial Steps (6)
+1. Highlight scissors in inventory \u2192 "This is your new Scissors booster!"
+2. Prompt drag \u2192 "Drag it onto any item Level 2 or higher"
+3. Show valid/invalid targets \u2192 "Green glow = valid. Red = can't cut."
+4. Execute guided cut \u2192 "Watch it split!"
+5. Show result \u2192 "You got 2x lower-level items!"
+6. Dismiss \u2192 "Try it yourself!"
+
+Interaction locked during all FTUE steps (Rule F4). UiLockManager reason: "scissors_ftue".
+
+---
+
+# 14. Reward System
+
+## 14.1 Cut Output Rewards
+- Destination: Board (primary) \u2192 Reward Center (overflow)
+- Max items per cut: 3 (Rainbow) \u2014 within the max 3 reward items limit (Rule R1)
+- Output type: Same merge chain as target, level - 1
+- Auto-collection at event end: N/A (scissors is permanent, not event-timed)
+
+## 14.2 Scissors Acquisition Rewards
+
+| Source | Event | Params |
+|--------|-------|--------|
+| Store purchase | rewards_store | item_id_1: [scissors ID], item_id_1_name: "scissors_regular", item_quantity_1: N, reward_destination: "balance", package_type: "scissors" |
+| Event/milestone reward | rewards_scissors | item_id_1: [scissors ID], item_id_1_name: "scissors_regular", item_quantity_1: N, reward_destination: "balance", source: "event|milestone|gift" |
+
+---
+
+# 15. Purchase Integration
+
+## 15.1 Store Integration
+- StoreItemType: StoreItemType.Scissors (Regular), StoreItemType.ScissorsRainbow (Premium)
+- package_type: "scissors" on all purchase events
+- Pricing: Configurable per store tier (store_1..store_10)
+- Currency: Credits (ID: 1) for regular, Cash (ID: 2) or real money for Rainbow
+
+## 15.2 Purchase Funnel (Rule PU1)
+Full 5-event funnel for scissors IAP:
+purchase_click \u2192 purchase_native_popup_impression \u2192 purchase_native_popup_click \u2192 purchase_successful / purchase_failed \u2192 rewards_store
+
+All events carry common params (Rule PU2):
+segment_id, package_id, purchase_id, currency, price_original, price_usd, sku, click_id, package_type: "scissors", is_sale, offer_id, sub_offer_id
+
+## 15.3 Comfort Zone Impact
+Rainbow Scissors purchases are included in the comfort zone weighted average (90-day lookback). Expected impact: minimal, as Rainbow is a low-price-point item.
+
+---
+
+# 16. Badge System
+Scissors do not have a lobby badge (they live in booster inventory, not lobby). No impression_scapes modification needed.
+Board badge: N/A \u2014 scissors count visible in booster toolbar.
+
+---
+
+# 17. CDN/Reskin
+MVP: No CDN/reskin needed. Scissors use static sprites bundled with the app.
+Phase 3: Themed scissors (holiday variants) will require CDN assets with standard retry/fallback behavior (Rule C1-C4).
+
+---
+
+# 18. UI Components
+
+## 18.1 Regular Scissors
+- Metallic silver-to-steel gradient
+- "x2" badge in secondary color
+- Standard elevated shadow
+
+## 18.2 Rainbow Scissors
+- Animated rainbow gradient (hue rotation)
+- "x3" badge in gold
+- Golden glow + floating sparkle particles
+
+## 18.3 Animation Timing
+
+| Phase | Time | Action |
+|-------|------|--------|
+| 0ms | Drop | Scissors snap to target, target freezes |
+| 100ms | Cut | Scissors close, diagonal slash, micro-shake |
+| 300ms | Split | Target dissolves, output items emerge |
+| 600ms | Settle | Items bounce into place, sparkle |
+| 800ms | Ready | UI updates, next action available |
+
+## 18.4 Feedback States
+
+| State | Visual | Audio |
+|-------|--------|-------|
+| Picked up | Pop scale 1.0 \u2192 1.1 | Metallic clink |
+| Valid hover | Green/gold pulsing glow | Soft chime |
+| Invalid hover | Red ring + shake | Soft thud |
+| Cut executing | Slash + particles | Crisp snip |
+| RC overflow | Items arc to RC panel | Whoosh |
+
+---
+
+# 19. Configuration Schema
+See Section 8.4 for remote config parameters. Full JSON config delivered via ScissorsBoosterConfigData entity config type.
+
+---
+
+# 20. Analytics
+
+All events follow Merge Cruise naming conventions: impression_, click_, rewards_, purchase_ categories with standard common params and click_id chains.
+
+## 20.1 Events
+
+| Event | Category | Trigger | Key Params |
+|-------|----------|---------|------------|
+| click_scissors_select | click_ | User picks up scissors | click_id, scissors_type, source |
+| click_scissors_cut | click_ | Successful cut executed | click_id, scissors_type, target_item_id, target_item_level, target_item_chain, output_count, items_on_board, items_to_rc, free_tiles, board_occupancy, session_cut_count, segment_id |
+| impression_scissors_invalid_target | impression_ | Invalid target attempted | click_id, reason, target_item_type, target_item_level, scissors_type, board_occupancy |
+| impression_scissors_popup | impression_ | Scissors store popup shown | click_id, scissors_type, scissors_count |
+| rewards_scissors | rewards_ | Scissors acquired from event/reward | item_id_1, item_id_1_name, item_quantity_1, reward_destination, source |
+| rewards_store | rewards_ | Scissors purchased from store | item_id_1, item_id_1_name, item_quantity_1, reward_destination, package_type: "scissors" |
+| impression_ftue_scissors_step_N | impression_ | FTUE step N shown | click_id, step, total_steps |
+| click_ftue_scissors_step_N | click_ | User completes FTUE step N | click_id |
+
+## 20.2 Purchase Funnel
+purchase_click \u2192 purchase_native_popup_impression \u2192 purchase_native_popup_click \u2192 purchase_successful / purchase_failed \u2192 rewards_store
+All with package_type: "scissors" + full purchase common params.
+
+## 20.3 Click ID Chains
+click_scissors_select (generates click_id) \u2192 click_scissors_cut (same click_id) \u2192 impression_scissors_invalid_target (same click_id, if invalid)
+impression_scissors_popup (click_id from badge/CTA) \u2192 purchase_click (same click_id)
+
+---
+
+# 21. Edge Cases & Error Handling
+
+## 21.1 Timing
+
+| Scenario | Behavior |
+|----------|----------|
+| Target merges during drag | Cancel, scissors return |
+| Target collected by task during drag | Cancel, scissors return |
+| LiveOps event ends mid-cut | Finish current cut, then process event end (Rule SM2) |
+| Two scissors dragged simultaneously | Second blocked until first completes |
+| Rapid successive cuts | 100ms debounce |
+
+## 21.2 Network & State
+
+| Scenario | Behavior |
+|----------|----------|
+| Disconnect mid-cut | Server rollback to last committed state |
+| App backgrounded mid-animation | Complete on resume |
+| Crash during execution | Atomic rollback |
+| Offline cut attempt | Execute locally, sync on reconnect with server validation |
+
+## 21.3 Economy
+
+| Risk | Mitigation |
+|------|-----------|
+| Item inflation from Rainbow (+2 net) | Control Rainbow acquisition rate per segment |
+| Cut \u2192 merge \u2192 cut exploit loops | Configurable daily_limit + rate limiting |
+| Scissors farming | Configurable drop rates, A/B tested |
+
+## 21.4 Undo Policy
+No undo. Cut is permanent, scissors consumed. Decision has weight. Consistent with game design philosophy.
+
+---
+
+# 22. Server Sync & Persistence
+
+## 22.1 Data Model
+Persistent data stored in ScissorsUserData (MessagePack serializable, Rule PR1):
+- scissors_regular_count: int
+- scissors_rainbow_count: int
+- ftue_scissors_completed: bool
+- total_cuts: int
+- session_cuts: int
+
+## 22.2 Balance Operations
+ValidationBalanceType.ScissorsUse \u2014 logged for every cut operation (Rule PR2).
+
+## 22.3 Sync Strategy
+- Cuts sync immediately after completion (not batched)
+- Offline cuts queued and synced on reconnect
+- Conflict resolution: server state wins (Rule PR3)
+- Cut history logged for audit trail
+
+---
+
+# 23. UI Locking
+
+| Phase | Lock Reason | What's Locked |
+|-------|------------|---------------|
+| FTUE steps | scissors_ftue | All board interaction except tutorial target |
+| Cut animation (0-800ms) | scissors_cut_animation | All board items, inventory, other boosters |
+| RC overflow animation | scissors_rc_overflow | RC panel until items settle |
+
+---
+
+# 24. Documentation & Links
+- Notion Assets: Scissors Special Item Assets (https://www.notion.so/2a3c2344a7dc80d2bbc1f34a0cad4b1e)
+- Prototype: Interactive Demo (https://split-reclaim-magic.lovable.app)
+- Related: Merge System Architecture, Booster Framework Spec, Economy Balance Model
+
+---
+
+# Appendix A: Performance Constraints
+
+| Constraint | Limit | Rationale |
+|-----------|-------|-----------|
+| Max simultaneous spawns | 3 (Rainbow) | Animation performance |
+| Cut animation duration | \u2264800ms | Responsive feel |
+| Validation latency | <16ms | Within single frame |
+| Memory overhead | <2MB | Sprites + animations |
+
+---
+
+# Appendix B: Open Questions
+
+| # | Question | Status |
+|---|----------|--------|
+| 1 | Integer item IDs for scissors \u2014 which IDs from catalog? | Needs content team |
+| 2 | GamePopupType enum IDs \u2014 1150/1151 available? | Needs engineering |
+| 3 | Scissors drop from generators (Phase 2) \u2014 which generator chains? | Phase 2 |
+| 4 | Daily cut limit needed? Monitor economy first. | Post-launch |
+| 5 | SFX priority \u2014 pending audio team | Pending |`;
+
+const SYSTEM=`You are "The Brief" \u2014 a Q&A assistant for the Merge Cruise Scissors Booster PRD (Scissors Booster).
+
+Your ONLY knowledge source is the PRD below. Answer based ONLY on what is in the PRD. If something is not covered, say "This isn't defined in the PRD" and suggest it may need to be added.
+
+Guidelines:
+- Be concise and clear
+- Use bullet points and short paragraphs
+- Reference section numbers when relevant (e.g. "See Section 5")
+- If the answer involves a flow, walk through the steps briefly
+- Use **bold** for key terms and backticks for field names or event names
+- Keep answers focused \u2014 extract what's relevant, don't dump entire sections
+- When referencing a section within this PRD, do NOT use links. Just write "See **Section 5**" or "(Section 6.2)" in bold. The user can search in Notion with Ctrl+F.
+- When referencing a SEPARATE document, use a clickable link:
+  - [Full PRD on Notion](https://www.notion.so/33dc2344a7dc8139a8b1e055ba901cf9)
+  - [Interactive Prototype](https://split-reclaim-magic.lovable.app)
+
+PRD:
+${PRD}`;
+
+let messages=[];
+let isTyping=false;
+
+function askExample(btn){document.getElementById('input').value=btn.textContent;send();}
+
+function fmt(text){
+  text=text.replace(/```(\w*)\n([\s\S]*?)```/g,'<pre><code>$2</code></pre>');
+  text=text.replace(/`([^`]+)`/g,'<code>$1</code>');
+  text=text.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  text=text.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
+  text=text.replace(/^### (.+)$/gm,'<h3>$1</h3>');
+  text=text.replace(/^## (.+)$/gm,'<h3>$1</h3>');
+  text=text.replace(/^- (.+)$/gm,'<li>$1</li>');
+  text=text.replace(/(<li>[\s\S]*?<\/li>)/g,function(m){return '<ul>'+m+'</ul>';});
+  text=text.replace(/<\/ul>\s*<ul>/g,'');
+  text=text.replace(/^\d+\. (.+)$/gm,'<li>$1</li>');
+  text=text.replace(/\n\n/g,'</p><p>');
+  text='<p>'+text+'</p>';
+  text=text.replace(/<p><\/p>/g,'');
+  text=text.replace(/<p>(<h3>|<ul>|<ol>|<pre>)/g,'$1');
+  text=text.replace(/(<\/h3>|<\/ul>|<\/ol>|<\/pre>)<\/p>/g,'$1');
+  return text;
+}
+
+function addMsg(role,text){
+  const chat=document.getElementById('chat');
+  const g=document.createElement('div');
+  g.className='msg-group '+(role==='user'?'user':'ai');
+  const a=document.createElement('div');
+  a.className='msg-avatar';
+  if(role==='user'){a.textContent='\u{1F464}';}
+  else{a.textContent='\u2728';a.style.cssText='background:linear-gradient(135deg,#1a1a2e,#3d3d7e);color:white;box-shadow:0 1px 2px rgba(0,0,0,0.04)';}
+  const c=document.createElement('div');
+  c.className='msg-content';
+  c.innerHTML=role==='user'?text.replace(/</g,'&lt;').replace(/>/g,'&gt;'):fmt(text);
+  g.appendChild(a);g.appendChild(c);chat.appendChild(g);
+  requestAnimationFrame(()=>{
+    if(role==='ai'){
+      g.scrollIntoView({behavior:'smooth',block:'start'});
+    } else {
+      chat.scrollTop=chat.scrollHeight;
+    }
+  });
+  return g;
+}
+
+function showTyping(){
+  const chat=document.getElementById('chat');
+  const ind=document.createElement('div');
+  ind.className='typing-indicator';ind.id='typing';
+  const a=document.createElement('div');
+  a.className='msg-avatar';
+  a.style.cssText='background:linear-gradient(135deg,#1a1a2e,#3d3d7e);color:white;box-shadow:0 1px 2px rgba(0,0,0,0.04)';
+  a.textContent='\u2728';
+  const d=document.createElement('div');
+  d.className='typing-dots';
+  d.innerHTML='<span></span><span></span><span></span>';
+  ind.appendChild(a);ind.appendChild(d);chat.appendChild(ind);
+  chat.scrollTop=chat.scrollHeight;
+}
+function hideTyping(){const el=document.getElementById('typing');if(el)el.remove();}
+
+async function send(){
+  if(isTyping)return;
+  const input=document.getElementById('input');
+  const text=input.value.trim();
+  if(!text)return;
+  input.value='';input.style.height='40px';
+  const w=document.getElementById('welcome');if(w)w.style.display='none';
+  const ex=document.getElementById('examples-section');if(ex)ex.style.display='none';
+  addMsg('user',text);
+  messages.push({role:'user',content:text});
+  const btn=document.getElementById('send-btn');
+  btn.disabled=true;isTyping=true;showTyping();
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':_d(_e,_k),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:2048,system:SYSTEM,messages:messages.slice(-10)})
+    });
+    hideTyping();
+    if(!resp.ok){const err=await resp.json();addMsg('ai','Sorry, I encountered an error: '+(err.error?.message||'Request failed.'));messages.pop();}
+    else{const data=await resp.json();const answer=data.content[0].text;addMsg('ai',answer);messages.push({role:'assistant',content:answer});}
+  }catch(e){hideTyping();addMsg('ai','Connection error. Please check your internet and try again.');messages.pop();}
+  btn.disabled=false;isTyping=false;input.focus();
+}
+</script>
+</body>
+</html>

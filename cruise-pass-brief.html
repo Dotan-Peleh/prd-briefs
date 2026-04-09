@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Brief — Cruise Pass PRD</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏆</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f8f8f6;
+    --surface: #ffffff;
+    --text: #1a1a1a;
+    --text-secondary: #6b6b6b;
+    --text-muted: #9a9a9a;
+    --accent: #d94452;
+    --accent-soft: #fef2f2;
+    --user-bg: #1a1a2e;
+    --user-text: #f0f0f5;
+    --border: #e8e8e4;
+    --border-light: #f0f0ec;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 2px 8px rgba(0,0,0,0.06);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --radius-pill: 100px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg); color: var(--text);
+    height: 100vh; display: flex; flex-direction: column;
+    overflow: hidden; -webkit-font-smoothing: antialiased;
+  }
+  .header {
+    padding: 18px 28px; background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 14px; flex-shrink: 0; z-index: 10;
+  }
+  .header-icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #2d2d5e 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0; box-shadow: var(--shadow-md);
+  }
+  .header-brand {
+    font-family: 'Newsreader', serif; font-size: 18px; font-weight: 600;
+    color: var(--text); letter-spacing: -0.3px;
+  }
+  .header-brand em {
+    font-style: italic; color: var(--accent); font-weight: 400;
+  }
+  .header-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; letter-spacing: 0.2px; }
+  .header-status {
+    margin-left: auto; display: flex; align-items: center; gap: 6px;
+    font-size: 10px; color: var(--text-muted); letter-spacing: 0.4px; text-transform: uppercase;
+  }
+  .header-status .pulse {
+    width: 6px; height: 6px; border-radius: 50%; background: #22c55e;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.85); }
+  }
+  .chat {
+    flex: 1; overflow-y: auto; padding: 24px 28px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .chat::-webkit-scrollbar { width: 5px; }
+  .chat::-webkit-scrollbar-track { background: transparent; }
+  .chat::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .msg-group {
+    display: flex; gap: 10px; max-width: 88%;
+    animation: msgIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .msg-group.user { align-self: flex-end; flex-direction: row-reverse; }
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .msg-avatar {
+    width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; margin-top: 2px;
+  }
+  .msg-group.ai .msg-avatar {
+    background: linear-gradient(135deg, #1a1a2e, #3d3d7e);
+    color: white; box-shadow: var(--shadow-sm);
+  }
+  .msg-group.user .msg-avatar { background: var(--user-bg); color: var(--user-text); }
+  .msg-content {
+    padding: 13px 17px; border-radius: var(--radius);
+    line-height: 1.65; font-size: 13.5px;
+  }
+  .msg-group.ai .msg-content {
+    background: var(--surface); color: var(--text);
+    border: 1px solid var(--border-light); box-shadow: var(--shadow-sm);
+    border-top-left-radius: 4px;
+  }
+  .msg-group.user .msg-content {
+    background: var(--user-bg); color: var(--user-text);
+    border-top-right-radius: 4px;
+  }
+  .msg-group.ai .msg-content strong { color: var(--accent); font-weight: 600; }
+  .msg-group.ai .msg-content code {
+    background: #f5f5f0; padding: 1px 6px; border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: #8b5cf6; border: 1px solid var(--border-light);
+  }
+  .msg-group.ai .msg-content pre {
+    background: #fafaf8; padding: 12px 14px; border-radius: var(--radius-sm);
+    margin: 8px 0; overflow-x: auto; border: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace; font-size: 11.5px;
+    line-height: 1.7; color: var(--text);
+  }
+  .msg-group.ai .msg-content h3 {
+    font-family: 'Newsreader', serif; color: var(--text);
+    margin: 12px 0 5px; font-size: 14.5px; font-weight: 600;
+  }
+  .msg-group.ai .msg-content h3:first-child { margin-top: 0; }
+  .msg-group.ai .msg-content ul, .msg-group.ai .msg-content ol { padding-left: 18px; margin: 5px 0; }
+  .msg-group.ai .msg-content li { margin: 2px 0; }
+  .msg-group.ai .msg-content p { margin: 5px 0; }
+  .msg-group.ai .msg-content p:first-child { margin-top: 0; }
+  .msg-group.ai .msg-content p:last-child { margin-bottom: 0; }
+  .msg-group.ai .msg-content a {
+    color: var(--accent); text-decoration: none;
+    border-bottom: 1px solid rgba(217,68,82,0.3);
+    transition: border-color 0.2s;
+  }
+  .msg-group.ai .msg-content a:hover { border-bottom-color: var(--accent); }
+  .typing-indicator {
+    display: flex; gap: 10px; max-width: 88%;
+    animation: msgIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .typing-dots {
+    padding: 14px 18px; background: var(--surface);
+    border: 1px solid var(--border-light); border-radius: var(--radius);
+    border-top-left-radius: 4px; box-shadow: var(--shadow-sm);
+    display: flex; gap: 5px; align-items: center;
+  }
+  .typing-dots span {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--text-muted); animation: bounce 1.2s ease-in-out infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-5px); opacity: 1; }
+  }
+  .examples-section { padding: 0 28px 18px; flex-shrink: 0; }
+  .examples-label {
+    font-size: 10px; color: var(--text-muted); text-transform: uppercase;
+    letter-spacing: 0.8px; margin-bottom: 9px; font-weight: 500;
+  }
+  .examples { display: flex; gap: 7px; flex-wrap: wrap; }
+  .example-pill {
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text-secondary); border-radius: var(--radius-pill);
+    padding: 8px 16px; font-size: 12.5px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+  }
+  .example-pill:hover {
+    border-color: var(--accent); color: var(--accent);
+    background: var(--accent-soft); transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+  .input-area {
+    padding: 16px 28px 20px; background: var(--surface);
+    border-top: 1px solid var(--border); flex-shrink: 0;
+  }
+  .input-wrapper {
+    display: flex; gap: 10px; align-items: flex-end;
+    background: var(--bg); border: 1.5px solid var(--border);
+    border-radius: var(--radius); padding: 5px 5px 5px 15px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .input-wrapper:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(217,68,82,0.08); }
+  .input-wrapper textarea {
+    flex: 1; background: transparent; border: none; padding: 9px 0;
+    color: var(--text); font-size: 13.5px; resize: none; height: 40px;
+    max-height: 120px; font-family: 'DM Sans', sans-serif; line-height: 1.5;
+  }
+  .input-wrapper textarea:focus { outline: none; }
+  .input-wrapper textarea::placeholder { color: var(--text-muted); }
+  .send-btn {
+    background: var(--user-bg); color: white; border: none;
+    border-radius: var(--radius-sm); width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0; transition: all 0.2s ease;
+  }
+  .send-btn:hover { background: #2a2a4e; transform: scale(1.05); }
+  .send-btn:disabled { background: var(--border); cursor: not-allowed; transform: none; }
+  .send-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .welcome { text-align: center; padding: 32px 20px 16px; animation: fadeIn 0.5s ease both; }
+  .welcome-emoji { font-size: 32px; margin-bottom: 10px; }
+  .welcome h2 { font-family: 'Newsreader', serif; font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .welcome h2 em { font-style: italic; color: var(--accent); font-weight: 400; }
+  .welcome p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; max-width: 400px; margin: 0 auto; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  @media (max-width: 600px) {
+    .header { padding: 14px 18px; }
+    .chat { padding: 18px; }
+    .examples-section { padding: 0 18px 14px; }
+    .input-area { padding: 12px 18px 16px; }
+    .msg-group { max-width: 94%; }
+    .msg-avatar { width: 26px; height: 26px; font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-icon">&#x1F3C6;</div>
+  <div>
+    <div class="header-brand">The Brief <em>by PeerPlay</em></div>
+    <div class="header-sub">Cruise Pass PRD &middot; Cruise Pass</div>
+  </div>
+  <div class="header-status"><div class="pulse"></div>Online</div>
+</div>
+<div id="chat" class="chat">
+  <div class="welcome" id="welcome">
+    <div class="welcome-emoji">&#x1F3C6;</div>
+    <h2>The Brief</h2>
+    <p>Ask anything about the Cruise Pass PRD and get instant answers.</p>
+  </div>
+</div>
+<div class="examples-section" id="examples-section">
+  <div class="examples-label">Try asking</div>
+  <div class="examples">
+    <button class="example-pill" onclick="askExample(this)">How does the progress bar work?</button>
+    <button class="example-pill" onclick="askExample(this)">What's the difference between Premium and Super Pass?</button>
+    <button class="example-pill" onclick="askExample(this)">How do daily quests work?</button>
+    <button class="example-pill" onclick="askExample(this)">What happens at season end?</button>
+    <button class="example-pill" onclick="askExample(this)">How does retroactive unlock work?</button>
+  </div>
+</div>
+<div class="input-area">
+  <div class="input-wrapper">
+    <textarea id="input" placeholder="Ask anything about the Cruise Pass PRD..." rows="1"
+      oninput="this.style.height='40px';this.style.height=Math.min(this.scrollHeight,120)+'px'"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send()}"></textarea>
+    <button class="send-btn" id="send-btn" onclick="send()">
+      <svg viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
+    </button>
+  </div>
+</div>
+<script>
+const _e="Pg5fBgs3XxQZGlVwQQpELTgXPDIGb0RldFZFDhx0FhoYHDElBjtBVREuEzZBeVsEel1ELyovCgE4AAAtWDkFXSokEzNeZkh4fSE4Vw4BNzsRISsgXQMUCDsDLFZxW3hZCVAFSj85ICInBCQC";
+const _k="MergeCruiseCloudSave2026";
+function _d(e,k){const b=atob(e);let r='';for(let i=0;i<b.length;i++)r+=String.fromCharCode(b.charCodeAt(i)^k.charCodeAt(i%k.length));return r;}
+
+const PRD_URL="https://www.notion.so/33dc2344a7dc81fdbc35c4572872b9eb";
+const PRD=`# Cruise Pass \u2014 PRD
+
+Status: Draft | Version: 1.0 | Date: 2026-04-10
+Type: Milestone/Collection + Purchase | LiveOps: 28-day seasons
+
+---
+
+# 1. Background & Context
+
+Merge-2 competitors (Merge Dragons, Gossip Harbor, Merge Mansion) ship season passes that drive sustained engagement and predictable revenue. Merge Cruise has no equivalent.
+
+Cruise Pass \u2014 a 28-day seasonal progression system:
+- 30 tiers with two parallel reward tracks (Free + Premium)
+- Progress fills automatically from normal gameplay (merges, generations, tasks)
+- No new currency \u2014 user sees only a progress bar filling
+- Two paid tiers: Premium Pass (\$4.99) and Super Pass (\$7.99) with +50% progress boost
+- Retroactive unlock \u2014 buy mid-season, instantly receive all missed premium rewards
+- Endless rewards after Tier 30 for Super Pass holders
+- Daily quests provide structured progression alongside passive action-based progress
+
+---
+
+# 2. MIAMI Framework
+
+### Motivations
+- Primary: Predictable recurring revenue via seasonal pass purchases
+- Secondary: Daily engagement \u2014 users MUST play regularly to maximize pass value
+- Reward loyal users, increase LTV of mid-spenders, framework for themed seasonal content
+
+### Success Metrics
+
+| Metric | Target | When |
+|--------|--------|------|
+| Premium Pass purchase rate | >8% of MAU | Season 2 |
+| D7 retention lift (pass holders) | +5pp | Season 1 |
+| DAU/MAU (pass holders) | >0.45 | Season 1 |
+| Pass holders reaching Tier 30 | >40% | Season 1 |
+
+### Key Risks
+- Cannibalization: May reduce other IAP. Monitor store revenue independently.
+- Completion anxiety: Pace calibrated for ~45min/day users reaching Tier 30 by Day 25.
+- Pay-to-win perception: Premium rewards = boosters only, NO power advantages.
+
+### Integrations
+Board (progress from actions), Scapes (progress from tasks), Store/Purchase (Premium IAP), Reward Center (tier rewards), Popup queue, Badge system, FTUE, Analytics, impression_scapes
+
+---
+
+# 3. Scope
+
+MVP: 30-tier dual track, action-based progression, Premium Pass IAP, season popup, tier unlock animation, lobby badge, FTUE, analytics, remote config, kill switch
+
+Later: Daily/weekly challenges, streak multiplier, themed seasons, progress boost IAP, seasonal decorations, social leaderboard
+
+---
+
+# 4. Feature Mechanics
+
+## 4.1 Progress
+
+Progress fills automatically from normal gameplay. No new currency. No visible numbers. User sees only a bar moving.
+
+| Action | Progress |
+|--------|----------|
+| Merge | +1 |
+| Generation | +1 |
+| Board task completion | +5 |
+| Scape task completion | +10 |
+| Chapter completion | +50 |
+| Daily login (first board entry) | +10 |
+
+Progress values are configurable per segment. Pacing target: ~45min/day user reaches Tier 30 by Day 25.
+
+Super Pass users get +50% on all progress values above (e.g., merge = +1.5 rounded, board task = +7.5 rounded). This means Super Pass holders can reach Tier 30 ~5 days earlier than standard users, leaving time for endless bonus rewards.
+
+## 4.2 Tiers
+
+30 tiers. Progress required increases gradually:
+
+| Tiers | Actions/Tier | Cumulative | Rewards |
+|-------|-------------|------------|---------|
+| 1-5 | 100 | 500 | Credits, small boosters |
+| 6-15 | 150 | 2,000 | Boosters, Album Packs |
+| 16-25 | 200 | 4,000 | Rare chests, large Credit bundles |
+| 26-30 | 250 | 5,250 | Exclusive seasonal items |
+
+## 4.3 Reward Tracks
+
+Free Track (all users): Credits, standard boosters, Common Album Packs
+
+Premium Track (\$4.99 Premium Pass): Large Credit bundles (3-5x free), Rare/Epic Album Packs, Premium boosters (Scissors, Rainbow Scissors), Tier 30 exclusive seasonal decoration
+
+Super Pass (\$7.99 = Premium + perks): Everything in Premium Track PLUS:
+- +50% progress boost on all actions (merge = +1.5 instead of +1)
+- Endless rewards after Tier 30 \u2014 continue earning bonus chests for every 250 progress beyond final tier
+- Immediate bonus on purchase: 1 Rare Album Pack + 2,000 Credits delivered instantly
+
+Retroactive Unlock: Buy Premium or Super Pass mid-season at Tier 18 \u2192 instantly receive all 18 missed premium rewards.
+
+## 4.4 Daily Quests
+
+In addition to passive progress from gameplay actions, users receive 3 daily quests each day that grant bonus progress when completed.
+
+| Quest Type | Example | Bonus Progress |
+|-----------|---------|----------------|
+| Complete orders | "Complete 5 board tasks" | +30 |
+| Spend credits | "Spend 500 Credits on generators" | +25 |
+| Merge items | "Merge 20 items" | +20 |
+
+Quest escalation: Difficulty increases gradually over the season:
+- Days 1-7: Easy targets (3 tasks, 5 merges, 200 credits)
+- Days 8-21: Medium targets (5 tasks, 10 merges, 500 credits)
+- Days 22-28: Hard targets (8 tasks, 20 merges, 1000 credits)
+
+Bonus quest: After completing all 3 daily quests, an endless repeatable quest appears: "Use 100 Credits" \u2192 +10 progress. Allows hardcore users to grind extra progress.
+
+Quest targets and bonus progress are configurable per segment.
+
+## 4.5 Endless Rewards (Super Pass only)
+
+Super Pass holders who reach Tier 30 continue earning rewards:
+- Every 250 progress beyond Tier 30 unlocks a bonus chest (random: Credits, Album Pack, or booster)
+- Progress bar reappears labeled "Bonus" with infinite repeating fill
+- Ensures no gameplay goes unrewarded for the rest of the season
+- Free and Premium Pass users do NOT get endless rewards \u2014 incentive to upgrade
+
+## 4.6 Season End
+
+- 24h grace period to claim unclaimed rewards
+- After grace: unclaimed rewards auto-delivered (currencies to balance, packs to album, items to Reward Center)
+- Progress resets. Premium Pass resets. Must repurchase next season.
+
+---
+
+# 5. User Flow
+
+## Flow Overview
+
+1. A new season is configured and goes live.
+2. The user enters the game and is eligible (chapter >= 8, season active, feature enabled).
+3. The Season Start popup appears showing the pass with 30 tiers and two tracks.
+4. If this is the user's first ever season, the FTUE tutorial plays (4 steps).
+5. The user plays normally on the board. A progress bar fills from merges, generations, and task completions.
+6. Each day, 3 daily quests appear (e.g., "Complete 5 tasks", "Spend 500 Credits") granting bonus progress when completed. An endless repeatable quest appears after all 3 are done.
+7. When the progress bar fills, a tier unlocks and the free reward is delivered to the designated place \u2014 Balance / RC / Album pack.
+8. If the user purchased the Premium or Super Pass, the premium reward is also delivered alongside the free reward.
+9. The user can purchase the Premium Pass (\$4.99) or Super Pass (\$7.99, includes +50% progress boost + endless rewards after Tier 30) at any point. All previously earned premium rewards are delivered instantly (retroactive unlock).
+10. Super Pass users who reach Tier 30 continue earning bonus chests for every 250 progress.
+11. When the season ends, a summary popup appears. A 24h grace period allows claiming unclaimed rewards.
+12. After the grace period, unclaimed rewards auto-collect. Progress and premium status reset.
+
+### Season Start & Eligibility
+
+1. The user enters the game and the Cruise Pass is configured for them, meaning:
+   - A season is currently active (within start/end date range)
+   - The user is at or above the configured minimum chapter (default: chapter 8)
+   - The feature is enabled for the user's segment
+2. When the user enters the lobby:
+   - The Cruise Pass lobby badge appears with the season theme icon, a timer counting down the days remaining, and the user's current tier number.
+   - If the user has purchased the Premium Pass, the badge has a gold border.
+3. The Season Start popup is displayed after all higher-priority popups. It contains:
+   - Season theme art and title (e.g., "Season 1: Summer Cruise")
+   - A scrollable preview of the first 5 tiers with free and premium rewards
+   - A "Start Playing" button (primary, blue)
+   - A "Get Premium \u2014 \$4.99" button (gold) and "Super Pass \u2014 \$7.99" button (gold + sparkle, showing "+50% Boost")
+   - Season timer showing days remaining
+
+### FTUE (first season only)
+
+1. If this is the user's first ever Cruise Pass season (ftue_cruise_pass_completed = false):
+   - After dismissing the Season Start popup, a 4-step tutorial plays:
+     1. Highlight the lobby badge \u2192 "This is your Cruise Pass! Earn rewards all season."
+     2. Highlight the progress bar on the board \u2192 "Play normally \u2014 merges and tasks fill the bar."
+     3. Open the Cruise Pass popup showing free vs premium tracks \u2192 "Free rewards for everyone. Premium rewards for pass holders."
+     4. Dismiss \u2192 "Start playing!"
+   - Interaction is locked during all FTUE steps. UiLockManager reason: "cruise_pass_ftue"
+   - After completion, ftue_cruise_pass_completed is set to true. The FTUE will not show again.
+
+### Progress During Gameplay
+
+1. The user plays normally on the board. A thin progress bar appears above the booster toolbar showing:
+   - The current tier number
+   - A visual fill indicating progress toward the next tier (NO numeric counter \u2014 just a bar)
+   - Tapping the bar opens the Cruise Pass popup
+2. As the user plays, the bar fills automatically:
+   - Each merge fills +1 progress
+   - Each generator tap fills +1 progress
+   - Each board task completion fills +5 progress
+   - Each scape task completion fills +10 progress
+   - Each chapter completion fills +50 progress
+   - First board entry of the day fills +10 progress (daily login)
+3. When the bar is close to the next tier (<20% remaining), it pulses gently to build anticipation.
+4. Progress accrual is completely passive and non-blocking \u2014 gameplay is never interrupted.
+
+### Tier Unlock
+
+1. When the progress bar reaches the threshold for the next tier:
+   - The bar fills completely with a burst animation
+   - A "Tier [N] Unlocked!" banner slides in from the top and auto-dismisses after 2 seconds
+   - The tier number increments and the bar resets for the next tier
+   - The free track reward is delivered based on its type:
+     - Credits/Cash \u2192 fly animation to the credit/cash balance meter
+     - Album Packs \u2192 fly animation to the album icon
+     - Items (boosters, chests, energy) \u2192 fly animation to the Reward Center
+   - If the user has purchased the Premium Pass, the premium reward is also delivered alongside with a gold border and sparkle effect
+   - If the user has NOT purchased the Premium Pass, the premium reward is shown as locked (gold padlock icon) in the Cruise Pass popup
+2. If multiple tiers are unlocked in one session (e.g., after a long play session), the banners appear sequentially with a 1-second delay between each. Rewards are batch-delivered to the Reward Center.
+
+### Premium / Super Pass Purchase
+
+1. At any time during the season, the user can purchase a pass by:
+   - Tapping "Get Premium" or "Super Pass" in the Season Start popup, OR
+   - Tapping "Get Pass" in the Cruise Pass popup (opened from badge or progress bar)
+2. When the user taps a purchase CTA:
+   - A confirmation popup appears showing two options side by side:
+     - Premium Pass \u2014 \$4.99: "30 extra rewards worth over \$30!" + retroactive note
+     - Super Pass \u2014 \$7.99: Everything in Premium PLUS "+50% Progress Boost" + "Endless rewards after Tier 30" + immediate bonus (1 Rare Album Pack + 2K Credits)
+     - If mid-season: "Instantly receive [N] premium rewards you've already earned!"
+     - "Not now" button (gray)
+   - If the user confirms either option, the native purchase flow starts.
+   - If the purchase is successful:
+     - All previously earned premium rewards (from Tier 1 to current tier) are delivered instantly in a cascade animation
+     - From this point forward, every new tier unlock delivers both free and premium rewards
+     - The lobby badge gets a gold border (Premium) or gold + sparkle border (Super)
+     - If Super Pass: progress multiplier activates immediately (+50% on all future actions) and immediate bonus delivered
+   - If the purchase fails, standard failure handling applies. No pass unlock.
+
+### Daily Quests
+
+1. Each day at the first board entry, 3 daily quests appear in a quest panel below the progress bar:
+   - Each quest has a clear target (e.g., "Complete 5 board tasks", "Merge 20 items", "Spend 500 Credits")
+   - Completing a quest grants bonus progress (+20 to +30 depending on difficulty)
+   - Quests escalate over the season: easy in Days 1-7, medium in Days 8-21, hard in Days 22-28
+2. After completing all 3 daily quests, an endless repeatable quest appears:
+   - "Use 100 Credits" \u2192 +10 progress (repeatable unlimited times)
+   - Allows hardcore users to grind extra progress beyond daily quests
+3. Quests reset at midnight UTC each day. Uncompleted quests do not carry over.
+
+### Cruise Pass Popup
+
+1. The user can open the Cruise Pass popup at any time by:
+   - Tapping the lobby badge in the scapes screen
+   - Tapping the progress bar on the board
+2. The popup shows:
+   - A scrollable trail of all 30 tiers in two columns (Free | Premium)
+   - The current tier is highlighted. Completed tiers show checkmarks.
+   - Locked premium rewards show a gold padlock
+   - A "Get Premium Pass" button at the bottom (if not purchased)
+
+### Season End
+
+1. When the season timer reaches 0:
+   - If the user is currently playing, the session continues uninterrupted.
+   - On the next lobby entry, a Season End popup appears: "Season Over! You reached Tier [N]!" with a summary of total rewards earned.
+2. A 24-hour grace period begins:
+   - The user can still open the Cruise Pass popup and claim any unclaimed rewards
+   - No new progress is earned. The progress bar is hidden.
+   - The lobby badge changes to "New Season Coming"
+3. After the grace period expires:
+   - All unclaimed rewards are auto-delivered \u2014 currencies to balance, packs to album, items to Reward Center
+   - Progress resets to 0
+   - Premium Pass status resets \u2014 must purchase again for the next season
+   - The lobby badge either disappears or immediately shows the next season
+
+### Tier 30 Completion
+
+1. If the user reaches Tier 30 before the season ends:
+   - A "Max Tier Reached!" celebration animation plays
+   - For free/Premium users: The progress bar is hidden (no more tiers to unlock). The lobby badge shows a checkmark.
+   - For Super Pass users: Progress bar reappears labeled "Bonus" \u2014 every 250 progress unlocks a bonus chest.
+   - Normal gameplay continues.
+
+---
+
+# 6. Configuration
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| premium_pass_price_usd | float | 4.99 | Premium Pass price |
+| super_pass_price_usd | float | 7.99 | Super Pass price (includes Premium) |
+| super_pass_progress_multiplier | float | 1.5 | Progress multiplier for Super Pass (1.5 = +50%) |
+| endless_reward_threshold | int | 250 | Progress per bonus chest after Tier 30 (Super only) |
+| daily_quest_count | int | 3 | Number of daily quests |
+| daily_quest_bonus_progress | int | 25 | Average bonus progress per quest |
+| endless_quest_cost | int | 100 | Credits cost for repeatable endless quest |
+| endless_quest_progress | int | 10 | Progress per endless quest completion |
+| season_duration_days | int | 28 | Season length |
+| total_tiers | int | 30 | Number of tiers |
+| progress_per_merge | int | 1 | Progress per merge |
+| progress_per_generation | int | 1 | Progress per generator tap |
+| progress_per_board_task | int | 5 | Progress per board task |
+| progress_per_scape_task | int | 10 | Progress per scape task |
+| progress_per_chapter | int | 50 | Progress per chapter |
+| progress_per_daily_login | int | 10 | Progress on first board entry |
+| premium_pass_sku_ios | string | com.peerplay.cruise.pass.s1 | App Store SKU |
+| premium_pass_sku_android | string | com.peerplay.cruise.pass.s1 | Play Store SKU |
+| grace_period_hours | int | 24 | Hours after season end to claim |
+| chapter_start | int | 8 | Min chapter for eligibility |
+
+LiveOps: EntityConfigType: CruisePassConfigData | Repeatable: false | Recompletable: false | HasNoBadge: false | Priority: High
+
+Tier rewards config: JSON array per season.
+
+### Config Spreadsheet Layout
+
+The season config is managed via Google Sheets with the following structure:
+
+| SegmentId | season_duration_days | total_tiers | progress_per_merge | progress_per_generation | progress_per_board_task | progress_per_scape_task | progress_per_chapter | progress_per_daily_login | premium_pass_price_usd |
+|-----------|---------------------|-------------|-------------------|------------------------|------------------------|------------------------|---------------------|--------------------------|----------------------|
+| cruise_pass_default | 28 | 30 | 1 | 1 | 5 | 10 | 50 | 10 | 9.99 |
+| cruise_pass_casual | 28 | 25 | 2 | 2 | 8 | 15 | 75 | 15 | 4.99 |
+| cruise_pass_hardcore | 28 | 40 | 1 | 1 | 3 | 7 | 30 | 5 | 14.99 |
+
+A second tab "Tier Rewards" defines rewards per tier per segment.
+
+---
+
+# 7. Segmentation
+
+- Source: Feature Flag via UserSegmentation. segment_id on all events.
+- Segmentable: premium_pass_price_usd, progress thresholds, tier rewards, total_tiers
+- A/B Tests: Feature on/off, Premium price (\$2.99/\$4.99/\$6.99), Super price (\$5.99/\$7.99/\$9.99), pacing, quest difficulty
+- Store tier impact: Pass purchases contribute to comfort zone weighted average
+
+---
+
+# 8. Popups
+
+| Popup | ID | Trigger | Dismiss |
+|-------|----|---------|---------|
+| SeasonStart | 1160 | First lobby entry after season start | "Start Playing" or "Get Premium" |
+| PassMain | 1161 | Tap badge or progress bar | Close |
+| Purchase | 1162 | "Get Premium" CTA | Purchase or "Not now" |
+| SeasonEnd | 1163 | Season timer expires | "OK" |
+| FTUE | 1164 | First season ever | Step completion |
+
+Priority: Critical > LiveOps > FTUE > Cruise Pass > Feature > Secondary
+
+---
+
+# 9. Badge & UI
+
+Wireframes: Cruise Pass Wireframes (Figma) (https://www.figma.com/design/HBJTUse1HlP0Y4u1bP2lh7)
+
+Lobby badge: Season icon + days remaining + current tier + gold border if premium
+Season Start popup: Full-screen, theme art, tier preview, dual CTAs
+Board progress bar: Thin bar above boosters. Visual fill only (no numbers). Tap to open Pass popup
+Pass popup: Scrollable 30-tier trail. Two columns (Free | Premium). Gold padlock on locked premium. "Get Premium" CTA at bottom
+Tier unlock banner: Slides in, auto-dismiss 2s. Non-blocking. Shows free + premium reward. Reward flies to destination.
+
+impression_scapes additions: is_cruise_pass_lobby_badge, cruise_pass_tier, cruise_pass_is_premium, cruise_pass_season_remaining_time
+
+---
+
+# 10. Edge Cases
+
+| Scenario | Behavior |
+|----------|----------|
+| Season ends during gameplay | Continue session. Popup on next lobby entry. Grace period starts. |
+| Purchase fails mid-flow | Standard failure handling. No premium unlock. No retry lock. |
+| Refund after purchase | Premium revoked. Already-claimed rewards NOT revoked (standard IAP policy). |
+| Buy Premium at Tier 30 | All 30 premium rewards instantly in cascade animation. |
+| Offline progress | Queued locally, synced on reconnect. Server reconciles. No double-counting. |
+| Disconnect during tier unlock | Server already incremented. Client catches up on reconnect. |
+| Disconnect during retroactive unlock | Atomic \u2014 all or none. Retry on reconnect. |
+| User reaches chapter 8 mid-season | Pass activates immediately. Progress starts from 0. Season timer already running (user gets remaining days, not full 28). |
+| Season config changes mid-season | Config locked at season start per user. Mid-season config changes apply only to new users entering the season. |
+| User closes app during purchase flow | On relaunch, if purchase was approved but spin not completed, Cruise Pass popup opens before other popups and purchase completes. |
+| User in grace period but no unclaimed rewards | Grace period ends silently. No popup. Badge transitions to next season. |
+| Multiple LiveOps features + Cruise Pass active | All co-exist. Progress from merges/tasks counts toward Cruise Pass AND any active LiveOps event (Flowers tokens, Race points, etc.). |
+| User has 0 scissors and premium tier gives scissors | Scissors delivered to board via standard BFS placement. If board full, to Reward Center. |
+| Premium pass purchased from different device | Server-validated. Premium status syncs across devices immediately. |
+
+---
+
+# 11. Persistence
+
+Data model (CruisePassUserData, MessagePack):
+season_id (string), current_tier (int), total_progress (int), is_premium (bool), premium_purchase_date (timestamp), tier_rewards_claimed (int[]), ftue_cruise_pass_completed (bool)
+
+Sync: Progress batched every 30s. Tier unlock + purchase sync immediately. Offline queued.
+
+Balance ops: ValidationBalanceType.CruisePassReward, ValidationBalanceType.CruisePassPurchase
+
+---
+
+# 12. Snapshot
+
+A cruise_pass_snapshot JSON field is added to impression_cruise_pass_popup and impression_scapes (when pass is active). It captures all configured tier rewards in a compact array view.
+
+Format: "tier_num: track: Free|Premium, item_id: id1, id2, quantity: qty1, qty2"
+Each tier has up to 2 entries (free + premium). Compact, queryable, one array for the entire pass.
+
+---
+
+# 13. Analytics
+
+### Super Properties (on ALL events during active season)
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| cruise_pass_live_ops_id | int | LiveOps ID for the current season |
+| cruise_pass_tier | int | Current tier (0-30) |
+| cruise_pass_is_premium | bool (0/1) | 1 = Premium or Super Pass purchased, 0 = free only |
+| cruise_pass_is_super | bool (0/1) | 1 = Super Pass purchased, 0 = free or Premium only |
+
+### Events
+
+| Event | Trigger | Key Params |
+|-------|---------|------------|
+| impression_cruise_pass_popup | Popup shown | click_id, source (season_start/badge/bar), season_id |
+| click_cruise_pass_badge | Badge tapped | click_id, season_id |
+| click_cruise_pass_purchase | "Get Premium" tapped | click_id, tier_at_purchase, days_elapsed, season_id |
+| cruise_pass_tier_unlocked | Tier threshold reached | tier, progress_total, is_premium, days_elapsed, season_id |
+| rewards_cruise_pass | Tier reward delivered | item_id_1, item_id_1_name, item_quantity_1, reward_destination, tier, track (free/premium), season_id |
+| cruise_pass_season_started | Season activates | season_id, segment_id, chapter |
+| cruise_pass_season_ended | Season expires | season_id, final_tier, total_progress, is_premium, rewards_claimed, rewards_auto_collected |
+| impression_ftue_cruise_pass_step_N | FTUE step shown | click_id, step, total_steps |
+| click_ftue_cruise_pass_step_N | FTUE step completed | click_id |
+| cruise_pass_daily_quest_completed | Daily quest finished | quest_type, quest_target, bonus_progress, day_of_season, difficulty |
+| cruise_pass_endless_quest_completed | Endless quest cycle done | credits_spent, progress_earned, endless_count_today |
+| cruise_pass_endless_reward_claimed | Bonus chest after Tier 30 (Super only) | reward_number, item_id_1, item_id_1_name, item_quantity_1 |
+
+### Purchase Funnel
+purchase_click \u2192 purchase_native_popup_impression \u2192 purchase_native_popup_click \u2192 purchase_successful / purchase_failed \u2192 rewards_store
+All with package_type: "cruise_pass" + standard purchase common params.
+
+### Modifications to Existing Events
+
+| Event | New Param | Type | Description |
+|-------|-----------|------|-------------|
+| impression_scapes | is_cruise_pass_lobby_badge | bool (0/1) | 1 = badge visible |
+| impression_scapes | cruise_pass_season_remaining_time | int | Seconds remaining |
+| merge | cruise_pass_progress_earned | int | Progress from this merge |
+| generation | cruise_pass_progress_earned | int | Progress from this generation |
+| board_tasks_task_ready | cruise_pass_progress_earned | int | Progress from this task |
+
+---
+
+# Appendix: Open Questions
+
+| # | Question | Status |
+|---|----------|--------|
+| 1 | Price point (\$4.99 / \$9.99 / \$14.99) | A/B test |
+| 2 | Tier 30 exclusive \u2014 decoration? Board item? | Design |
+| 3 | Progress from LiveOps events too? MVP: board only. | Post-launch |
+| 4 | Daily/weekly challenges for bonus progress? | Season 2 |
+| 5 | Popup IDs 1160-1164 available? | Engineering |
+| 6 | Progress bar placement \u2014 replace or alongside board tasks? | UX review |
+
+---
+
+# Appendix: Tier Rewards Config Example
+
+Tier 1 Free: 500 credits
+Tier 1 Premium: 2000 credits
+Tier 5 Free: 1000 credits
+Tier 5 Premium: 1 album_pack_common + 3000 credits
+Tier 15 Free: 2000 credits
+Tier 15 Premium: 1 chest_rare (4 taps, 100 credits/tap)
+Tier 30 Free: 5000 credits
+Tier 30 Premium: 1 seasonal_decoration + 1 chest_epic (5 taps, 150 credits/tap)`;
+
+const SYSTEM=`You are "The Brief" \u2014 a Q&A assistant for the Merge Cruise Cruise Pass PRD (Cruise Pass).
+
+Your ONLY knowledge source is the PRD below. Answer based ONLY on what is in the PRD. If something is not covered, say "This isn't defined in the PRD" and suggest it may need to be added.
+
+Guidelines:
+- Be concise and clear
+- Use bullet points and short paragraphs
+- Reference section numbers when relevant (e.g. "See Section 5")
+- If the answer involves a flow, walk through the steps briefly
+- Use **bold** for key terms and backticks for field names or event names
+- Keep answers focused \u2014 extract what's relevant, don't dump entire sections
+- When referencing a section within this PRD, do NOT use links. Just write "See **Section 5**" or "(Section 6.2)" in bold. The user can search in Notion with Ctrl+F.
+- When referencing a SEPARATE document, use a clickable link:
+  - [Full PRD on Notion](https://www.notion.so/33dc2344a7dc81fdbc35c4572872b9eb)
+  - [Cruise Pass Wireframes (Figma)](https://www.figma.com/design/HBJTUse1HlP0Y4u1bP2lh7)
+
+PRD:
+${PRD}`;
+
+let messages=[];
+let isTyping=false;
+
+function askExample(btn){document.getElementById('input').value=btn.textContent;send();}
+
+function fmt(text){
+  text=text.replace(/```(\w*)\n([\s\S]*?)```/g,'<pre><code>$2</code></pre>');
+  text=text.replace(/`([^`]+)`/g,'<code>$1</code>');
+  text=text.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  text=text.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
+  text=text.replace(/^### (.+)$/gm,'<h3>$1</h3>');
+  text=text.replace(/^## (.+)$/gm,'<h3>$1</h3>');
+  text=text.replace(/^- (.+)$/gm,'<li>$1</li>');
+  text=text.replace(/(<li>[\s\S]*?<\/li>)/g,function(m){return '<ul>'+m+'</ul>';});
+  text=text.replace(/<\/ul>\s*<ul>/g,'');
+  text=text.replace(/^\d+\. (.+)$/gm,'<li>$1</li>');
+  text=text.replace(/\n\n/g,'</p><p>');
+  text='<p>'+text+'</p>';
+  text=text.replace(/<p><\/p>/g,'');
+  text=text.replace(/<p>(<h3>|<ul>|<ol>|<pre>)/g,'$1');
+  text=text.replace(/(<\/h3>|<\/ul>|<\/ol>|<\/pre>)<\/p>/g,'$1');
+  return text;
+}
+
+function addMsg(role,text){
+  const chat=document.getElementById('chat');
+  const g=document.createElement('div');
+  g.className='msg-group '+(role==='user'?'user':'ai');
+  const a=document.createElement('div');
+  a.className='msg-avatar';
+  if(role==='user'){a.textContent='\u{1F464}';}
+  else{a.textContent='\u2728';a.style.cssText='background:linear-gradient(135deg,#1a1a2e,#3d3d7e);color:white;box-shadow:0 1px 2px rgba(0,0,0,0.04)';}
+  const c=document.createElement('div');
+  c.className='msg-content';
+  c.innerHTML=role==='user'?text.replace(/</g,'&lt;').replace(/>/g,'&gt;'):fmt(text);
+  g.appendChild(a);g.appendChild(c);chat.appendChild(g);
+  requestAnimationFrame(()=>{
+    if(role==='ai'){
+      g.scrollIntoView({behavior:'smooth',block:'start'});
+    } else {
+      chat.scrollTop=chat.scrollHeight;
+    }
+  });
+  return g;
+}
+
+function showTyping(){
+  const chat=document.getElementById('chat');
+  const ind=document.createElement('div');
+  ind.className='typing-indicator';ind.id='typing';
+  const a=document.createElement('div');
+  a.className='msg-avatar';
+  a.style.cssText='background:linear-gradient(135deg,#1a1a2e,#3d3d7e);color:white;box-shadow:0 1px 2px rgba(0,0,0,0.04)';
+  a.textContent='\u2728';
+  const d=document.createElement('div');
+  d.className='typing-dots';
+  d.innerHTML='<span></span><span></span><span></span>';
+  ind.appendChild(a);ind.appendChild(d);chat.appendChild(ind);
+  chat.scrollTop=chat.scrollHeight;
+}
+function hideTyping(){const el=document.getElementById('typing');if(el)el.remove();}
+
+async function send(){
+  if(isTyping)return;
+  const input=document.getElementById('input');
+  const text=input.value.trim();
+  if(!text)return;
+  input.value='';input.style.height='40px';
+  const w=document.getElementById('welcome');if(w)w.style.display='none';
+  const ex=document.getElementById('examples-section');if(ex)ex.style.display='none';
+  addMsg('user',text);
+  messages.push({role:'user',content:text});
+  const btn=document.getElementById('send-btn');
+  btn.disabled=true;isTyping=true;showTyping();
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':_d(_e,_k),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:2048,system:SYSTEM,messages:messages.slice(-10)})
+    });
+    hideTyping();
+    if(!resp.ok){const err=await resp.json();addMsg('ai','Sorry, I encountered an error: '+(err.error?.message||'Request failed.'));messages.pop();}
+    else{const data=await resp.json();const answer=data.content[0].text;addMsg('ai',answer);messages.push({role:'assistant',content:answer});}
+  }catch(e){hideTyping();addMsg('ai','Connection error. Please check your internet and try again.');messages.pop();}
+  btn.disabled=false;isTyping=false;input.focus();
+}
+</script>
+</body>
+</html>
