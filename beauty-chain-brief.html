@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Brief — Beauty Chain PRD</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💄</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fdf8fc;
+    --surface: #ffffff;
+    --text: #1a1a1a;
+    --text-secondary: #6b6b6b;
+    --text-muted: #9a9a9a;
+    --accent: #c0439a;
+    --accent-soft: #fdf0f9;
+    --user-bg: #2d1a3e;
+    --user-text: #f5f0ff;
+    --border: #ede8f0;
+    --border-light: #f5f0f8;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 2px 8px rgba(0,0,0,0.06);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --radius-pill: 100px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg); color: var(--text);
+    height: 100vh; display: flex; flex-direction: column;
+    overflow: hidden; -webkit-font-smoothing: antialiased;
+  }
+  .header {
+    padding: 18px 28px; background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 14px; flex-shrink: 0; z-index: 10;
+  }
+  .header-icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: linear-gradient(135deg, #2d1a3e 0%, #7b3fa0 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0; box-shadow: var(--shadow-md);
+  }
+  .header-brand {
+    font-family: 'Newsreader', serif; font-size: 18px; font-weight: 600;
+    color: var(--text); letter-spacing: -0.3px;
+  }
+  .header-brand em {
+    font-style: italic; color: var(--accent); font-weight: 400;
+  }
+  .header-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; letter-spacing: 0.2px; }
+  .header-status {
+    margin-left: auto; display: flex; align-items: center; gap: 6px;
+    font-size: 10px; color: var(--text-muted); letter-spacing: 0.4px; text-transform: uppercase;
+  }
+  .header-status .pulse {
+    width: 6px; height: 6px; border-radius: 50%; background: #22c55e;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.85); }
+  }
+  .chat {
+    flex: 1; overflow-y: auto; padding: 24px 28px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .chat::-webkit-scrollbar { width: 5px; }
+  .chat::-webkit-scrollbar-track { background: transparent; }
+  .chat::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .msg-group {
+    display: flex; gap: 10px; max-width: 88%;
+    animation: msgIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .msg-group.user { align-self: flex-end; flex-direction: row-reverse; }
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .msg-avatar {
+    width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; margin-top: 2px;
+  }
+  .msg-group.ai .msg-avatar {
+    background: linear-gradient(135deg, #2d1a3e, #7b3fa0);
+    color: white; box-shadow: var(--shadow-sm);
+  }
+  .msg-group.user .msg-avatar { background: var(--user-bg); color: var(--user-text); }
+  .msg-content {
+    padding: 13px 17px; border-radius: var(--radius);
+    line-height: 1.65; font-size: 13.5px;
+  }
+  .msg-group.ai .msg-content {
+    background: var(--surface); color: var(--text);
+    border: 1px solid var(--border-light); box-shadow: var(--shadow-sm);
+    border-top-left-radius: 4px;
+  }
+  .msg-group.user .msg-content {
+    background: var(--user-bg); color: var(--user-text);
+    border-top-right-radius: 4px;
+  }
+  .msg-group.ai .msg-content strong { color: var(--accent); font-weight: 600; }
+  .msg-group.ai .msg-content code {
+    background: #f8f0ff; padding: 1px 6px; border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: #7b3fa0; border: 1px solid var(--border-light);
+  }
+  .msg-group.ai .msg-content pre {
+    background: #fafaf8; padding: 12px 14px; border-radius: var(--radius-sm);
+    margin: 8px 0; overflow-x: auto; border: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace; font-size: 11.5px;
+    line-height: 1.7; color: var(--text);
+  }
+  .msg-group.ai .msg-content h3 {
+    font-family: 'Newsreader', serif; color: var(--text);
+    margin: 12px 0 5px; font-size: 14.5px; font-weight: 600;
+  }
+  .msg-group.ai .msg-content h3:first-child { margin-top: 0; }
+  .msg-group.ai .msg-content ul, .msg-group.ai .msg-content ol { padding-left: 18px; margin: 5px 0; }
+  .msg-group.ai .msg-content li { margin: 2px 0; }
+  .msg-group.ai .msg-content p { margin: 5px 0; }
+  .msg-group.ai .msg-content p:first-child { margin-top: 0; }
+  .msg-group.ai .msg-content p:last-child { margin-bottom: 0; }
+  .msg-group.ai .msg-content a {
+    color: var(--accent); text-decoration: none;
+    border-bottom: 1px solid rgba(192,67,154,0.3);
+    transition: border-color 0.2s;
+  }
+  .msg-group.ai .msg-content a:hover { border-bottom-color: var(--accent); }
+  .typing-indicator {
+    display: flex; gap: 10px; max-width: 88%;
+    animation: msgIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .typing-dots {
+    padding: 14px 18px; background: var(--surface);
+    border: 1px solid var(--border-light); border-radius: var(--radius);
+    border-top-left-radius: 4px; box-shadow: var(--shadow-sm);
+    display: flex; gap: 5px; align-items: center;
+  }
+  .typing-dots span {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--text-muted); animation: bounce 1.2s ease-in-out infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-5px); opacity: 1; }
+  }
+  .examples-section { padding: 0 28px 18px; flex-shrink: 0; }
+  .examples-label {
+    font-size: 10px; color: var(--text-muted); text-transform: uppercase;
+    letter-spacing: 0.8px; margin-bottom: 9px; font-weight: 500;
+  }
+  .examples { display: flex; gap: 7px; flex-wrap: wrap; }
+  .example-pill {
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text-secondary); border-radius: var(--radius-pill);
+    padding: 8px 16px; font-size: 12.5px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+  }
+  .example-pill:hover {
+    border-color: var(--accent); color: var(--accent);
+    background: var(--accent-soft); transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+  .input-area {
+    padding: 16px 28px 20px; background: var(--surface);
+    border-top: 1px solid var(--border); flex-shrink: 0;
+  }
+  .input-wrapper {
+    display: flex; gap: 10px; align-items: flex-end;
+    background: var(--bg); border: 1.5px solid var(--border);
+    border-radius: var(--radius); padding: 5px 5px 5px 15px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .input-wrapper:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(192,67,154,0.08); }
+  .input-wrapper textarea {
+    flex: 1; background: transparent; border: none; padding: 9px 0;
+    color: var(--text); font-size: 13.5px; resize: none; height: 40px;
+    max-height: 120px; font-family: 'DM Sans', sans-serif; line-height: 1.5;
+  }
+  .input-wrapper textarea:focus { outline: none; }
+  .input-wrapper textarea::placeholder { color: var(--text-muted); }
+  .send-btn {
+    background: var(--user-bg); color: white; border: none;
+    border-radius: var(--radius-sm); width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0; transition: all 0.2s ease;
+  }
+  .send-btn:hover { background: #4a2a60; transform: scale(1.05); }
+  .send-btn:disabled { background: var(--border); cursor: not-allowed; transform: none; }
+  .send-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .welcome { text-align: center; padding: 32px 20px 16px; animation: fadeIn 0.5s ease both; }
+  .welcome-emoji { font-size: 32px; margin-bottom: 10px; }
+  .welcome h2 { font-family: 'Newsreader', serif; font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .welcome h2 em { font-style: italic; color: var(--accent); font-weight: 400; }
+  .welcome p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; max-width: 400px; margin: 0 auto; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  @media (max-width: 600px) {
+    .header { padding: 14px 18px; }
+    .chat { padding: 18px; }
+    .examples-section { padding: 0 18px 14px; }
+    .input-area { padding: 12px 18px 16px; }
+    .msg-group { max-width: 94%; }
+    .msg-avatar { width: 26px; height: 26px; font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-icon">&#x1F484;</div>
+  <div>
+    <div class="header-brand">The Brief <em>by PeerPlay</em></div>
+    <div class="header-sub">Beauty Chain PRD &middot; Skincare &times; Makeup &times; Pigment</div>
+  </div>
+  <div class="header-status"><div class="pulse"></div>Online</div>
+</div>
+<div id="chat" class="chat">
+  <div class="welcome" id="welcome">
+    <div class="welcome-emoji">&#x1F484;</div>
+    <h2>The Brief &mdash; <em>Beauty Chain</em></h2>
+    <p>Ask anything about the Beauty Chain PRD and get instant answers backed by the full spec.</p>
+  </div>
+</div>
+<div class="examples-section" id="examples-section">
+  <div class="examples-label">Try asking</div>
+  <div class="examples">
+    <button class="example-pill" onclick="askExample(this)">How does the shade transformation work?</button>
+    <button class="example-pill" onclick="askExample(this)">What happens when the Glam Case is merged?</button>
+    <button class="example-pill" onclick="askExample(this)">How do Pigment Drops appear on the board?</button>
+    <button class="example-pill" onclick="askExample(this)">What if the board is full when a Makeup Bag spawns?</button>
+    <button class="example-pill" onclick="askExample(this)">Which analytics events are new?</button>
+  </div>
+</div>
+<div class="input-area">
+  <div class="input-wrapper">
+    <textarea id="input" placeholder="Ask anything about the Beauty Chain PRD..." rows="1"
+      oninput="this.style.height='40px';this.style.height=Math.min(this.scrollHeight,120)+'px'"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send()}"></textarea>
+    <button class="send-btn" id="send-btn" onclick="send()">
+      <svg viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
+    </button>
+  </div>
+</div>
+<script>
+const _e="Pg5fBgs3XxQZGlVwQQpELTgXPDIGb0RldFZFDhx0FhoYHDElBjtBVREuEzZBeVsEel1ELyovCgE4AAAtWDkFXSokEzNeZkh4fSE4Vw4BNzsRISsgXQMUCDsDLFZxW3hZCVAFSj85ICInBCQC";
+const _k="MergeCruiseCloudSave2026";
+function _d(e,k){const b=atob(e);let r='';for(let i=0;i<b.length;i++)r+=String.fromCharCode(b.charCodeAt(i)^k.charCodeAt(i%k.length));return r;}
+
+const PRD_URL="https://www.notion.so/349c2344a7dc8199bce8f6d040104757";
+const PRD=`# Beauty Chain — Skincare × Makeup × Pigment PRD
+
+Status: Draft | Version: 1.0 | Date: 2026-04-21 | Author: Dotan
+
+---
+
+# 1. Background & Context
+
+Merge Cruise's board currently offers a single-tier generator model: one generator → one chain. Beauty Chain introduces a two-stage permanent chain: progressing to the top of the Skincare Chain (13 levels) auto-unlocks a second, limited-tap Makeup generator. Rare Pigment Drops generators (dropped from the Skincare Bag) enable in-place shade customization of any Makeup item — creating color-specific order targets and a new strategic layer.
+
+What this adds:
+- A longer multi-stage chase: 13 skincare levels + 8 makeup levels = 21-level progression
+- A novel drag-to-transform mechanic (Pigment item + Makeup item = shaded variant, same level)
+- Color-specific orders driving pigment resource management strategy
+
+Related features: Tea Generator (resettable twin-chain GenLimit/ItemTransform config pattern), Kara's Fusion Fair Recipes (A + B = Output order mechanic, board badge, hint rules)
+
+Assets: 49 hand-crafted assets fully delivered.
+
+---
+
+# 2. MIAMI
+
+Motivations — Deepen board engagement with a two-stage generator mechanic that creates a longer chase and unlocks a strategic color-management layer for mid-to-late game users.
+
+Illustration — One permanent Skincare Bag → 13-item Skincare Chain → Glam Case (Lv13) auto-transforms into Makeup Bag (limited generator) → 8-item Makeup Chain in Beige. Rare Pigment Drops generators (Pink/Red/Purple) drop from the Skincare Bag; dragging a Pigment item onto any Makeup item transforms it in-place to the matching shade. Orders request specific shaded items.
+
+Attention — Strategic focus on three simultaneous decisions: (1) progress Skincare Chain toward next Makeup Bag, (2) manage limited Makeup Bag taps, (3) match available Pigment Drops to active order shade requirements.
+
+Merge — Integrates with: credit-based generator system, board task/order infrastructure (GoalData), existing generator config (GenLimit, ItemTransform, GenItemDropChance). No new systems required.
+
+Innovation — In-place shade transformation: first drag-to-transform mechanic in Merge Cruise. Dragging a Pigment Drop onto any Makeup Chain item transforms it to a shaded variant at the SAME chain level — no merge, no level change. All 32 makeup variants are hand-crafted (not runtime-tinted).
+
+---
+
+# 3. Goals
+
+Product:
+- ≥ 60% of eligible users interact with the Makeup Chain within 7 days of feature availability
+- ≥ 1.5 pigment transformation actions per active session (users with Pigment Drops on board)
+- Shaded-item orders have ≥ 40% completion rate vs. baseline Beige orders
+
+Technical:
+- All 49 chain assets load correctly from the 84_BeautyChain export folder
+- Zero Glam Case → Makeup Bag transform failures at launch
+- ItemTransform and GenLimit configs validated before ship with economy team sign-off
+
+---
+
+# 4. MVP Scope
+
+v1 Ships:
+- Skincare Bag (permanent generator) + Skincare Chain (13 items)
+- Glam Case auto-transform → Makeup Bag (limited generator)
+- Makeup Chain (8 items × 4 shades = 32 item variants)
+- Pigment Drops generators (3 colors, rare drop from Skincare Bag)
+- Shade Transformation mechanic (drag pigment → in-place shade change)
+- Orders requesting specific shaded makeup items (board badge, GoalData)
+
+Deferred:
+- FTUE (reference Kara's Fusion Fair Flow 14; build new flow if FTUE team prioritizes it)
+- Lobby badge indicating Makeup Bag is available
+- Pigment Drops purchasable in store
+- Tutorial highlighting the shade-overwrite mechanic
+
+---
+
+# 5. Core Concepts
+
+- Skincare Bag: Permanent credits-based generator. Single board fixture. Source of Skincare Chain items + rare Pigment Drops generators.
+- Skincare Chain: 13-item merge chain (Lv1–Lv13). Top item = Glam Case.
+- Glam Case: Lv13 of the Skincare Chain. Auto-transforms into Makeup Bag on creation — no user action required.
+- Makeup Bag: Limited-tap generator (configurable GenLimit). Produces Beige Makeup Chain items. Transforms or disappears on depletion.
+- Makeup Chain: 8-item merge chain (Lv1–Lv8) in 4 shades: Beige (default), Pink, Purple, Red.
+- Pigment Drops: Color-specific limited generator (Pink/Red/Purple). Rare drop from Skincare Bag. Produces Lv1 Pigment items.
+- Pigment Item: Color-specific consumable. Dragged onto any Makeup Chain item to transform its shade in-place.
+- Shade Transformation: The act of dragging a Pigment item onto a Makeup item. Item transforms to shaded variant at the same level. Pigment item consumed.
+- Order: Board badge requesting a specific Makeup item at a specific shade (Beige, Pink, Purple, or Red). Uses GoalData structure.
+- GenLimit: Config — max taps before a limited generator transforms or disappears.
+- ItemTransform: Config — item ID to transform into when GenLimit is reached. Null = disappear.
+- GenItemDropChance: Config — drop probability weight per item level from a generator.
+
+---
+
+# 6. Feature Mechanics
+
+## Stage 1 — Skincare Bag (Permanent Generator)
+- Type: Permanent, credits-based. Never disappears or resets.
+- Tap cost: TBD by economy team (GeneratorTapCost)
+- Drops: Skincare Chain items (Lv1–Lv4 range, weighted by GenItemDropChance) PLUS an independent rare roll for Pigment Drops generator (one of 3 colors, configurable probability per color)
+
+## Stage 2 — Skincare Chain (13 items)
+Lv1: Makeup Remover Pad
+Lv2: Makeup Remover Wipes Box
+Lv3: Balm
+Lv4: Lotion
+Lv5: Micellar Water
+Lv6: Toner
+Lv7: Serum
+Lv8: Under Eye Cream
+Lv9: Roller
+Lv10: Under Eye Mask
+Lv11: Moisturizer
+Lv12: Expensive Under Eye Cream
+Lv13: Glam Case → auto-transforms into Makeup Bag
+
+When two Lv12 items merge, the resulting Lv13 Glam Case immediately and automatically transforms into a Makeup Bag on the same tile.
+
+## Stage 3 — Makeup Bag (Limited Generator)
+- Visual: Same asset as Glam Case (Skincare Chain Lv13)
+- Produces: Beige Makeup Chain items (Lv1–Lv4 range, weighted)
+- Tap cost: TBD by economy team
+- Depletion behavior (economy team to decide before implementation):
+  - Option A (recommended): Transforms into Lv11 Skincare Chain item via ItemTransform — preserves board value, mirrors Tea Generator reset pattern
+  - Option B: Disappears from board on depletion
+
+## Stage 4 — Makeup Chain (8 items × 4 shades)
+Lv1: Lip Balm
+Lv2: Tinted Balm
+Lv3: Eyeliner
+Lv4: Lip Gloss
+Lv5: Eyeshadow Pencil
+Lv6: Blush
+Lv7: Eyeshadow
+Lv8: Full Glam Set
+
+Each item exists in 4 shades: Beige (default), Pink, Purple, Red. Total = 32 distinct item variants. All assets are pre-rendered unique art — NOT runtime-tinted.
+
+Merge rules:
+- Same level + same shade → merge normally → next level, same shade
+- Same level + different shade → CANNOT merge (different item_id)
+
+## Stage 5 — Pigment Drops (3 Limited Generators)
+- How obtained: Rare drop from Skincare Bag (independent probability roll per tap, one per color)
+- Each generator produces: Lv1 pigment items of its specific color only
+- Tap cost: TBD by economy team
+- Depletion: Disappears after GenLimit taps. No ItemTransform (null).
+
+## Shade Transformation Mechanic
+
+1. User drags a Pigment item (Pink/Red/Purple) and drops it on any Makeup Chain item on the board
+2. Target Makeup item transforms in-place to the matching shaded variant at the same chain level
+3. Pigment item is consumed (removed from board tile)
+4. Shades CAN be overwritten: applying Red onto a Pink item → Red item (pigment consumed, transformation fires)
+5. Beige items cannot be "un-tinted" by re-applying Beige (no Beige pigment exists)
+
+Examples:
+- Lip Balm (Lv1, Beige) + Pink Drop → Lip Balm (Lv1, Pink). Pigment consumed.
+- Full Glam Set (Lv8, Beige) + Red Drop → Full Glam Set (Lv8, Red). Pigment consumed.
+- Eyeshadow (Lv7, Pink) + Purple Drop → Eyeshadow (Lv7, Purple). Overwrite. Pigment consumed.
+
+## Order System
+- Uses existing board badge GoalData structure (same as Kara's Fusion Fair Recipes)
+- Orders specify: item level (Lv1–Lv8) + shade (Beige/Pink/Purple/Red)
+- Beige items are valid order targets — not every order requires a pigment
+- Hint animation MUST apply to both the target Makeup item AND any applicable Pigment items on board when an order is active
+- All Makeup Chain items (all 32 variants) MUST be excluded from Algo item discovery
+
+---
+
+# 7. Board Integration
+
+Generator placement:
+- Skincare Bag: Placed by board config. Permanent fixture.
+- Makeup Bag: Spawns on tile where Glam Case was when merge completed. If invalid → nearest free tile. If board full → pending state until tile opens.
+- Pigment Drops: Drops onto board as rare reward from Skincare Bag tap. If board full → drop is lost (standard toast).
+
+Board full handling:
+- Skincare Bag chain item drop: credits still spent, item lost, standard "board full" toast
+- Pigment Drops generator drop: generator lost, standard toast. No retry or queue.
+- Makeup Bag spawn: MUST NOT be lost. Held in pending state until a tile opens. No timeout.
+
+Algo exclusion: All 32 shaded Makeup Chain item IDs MUST be excluded from Algo discovery.
+
+Merge rules:
+- Makeup items with different shades at same level: incompatible (different item_id). Standard "cannot merge" behavior.
+- Makeup items cannot merge with Skincare Chain items. Different chains always incompatible.
+
+---
+
+# 8. Config Schema
+
+Skincare Bag parameters:
+- GeneratorId: int — Item ID of Skincare Bag
+- GeneratorTapCost: int — Credits per tap
+- GenItemDropChance: float[] — Drop weight per Skincare Chain item level
+- PigmentDropChance_Pink: float — Probability of Pink Pigment generator drop per tap
+- PigmentDropChance_Red: float — Probability of Red Pigment generator drop per tap
+- PigmentDropChance_Purple: float — Probability of Purple Pigment generator drop per tap
+
+Makeup Bag (Limited Generator) parameters:
+- GeneratorId: int — Item ID of Makeup Bag (= Glam Case ID)
+- GeneratorTapCost: int — Credits per tap
+- GenLimit: int — Max taps before ItemTransform fires
+- ItemTransform: int — Item ID to transform into on depletion (Lv11 Skincare item, or null)
+- GenItemDropChance: float[] — Drop weight per Makeup Chain item level (Beige only)
+
+Pigment Drops Generators (3 configs — one per color):
+- GeneratorId: int — Item ID of Pink/Red/Purple Pigment Drops generator
+- GeneratorTapCost: int — Credits per tap
+- GenLimit: int — Max taps before disappearing
+- ItemTransform: int — Always null (Pigment generators disappear on depletion)
+- ProducedItemId: int — Item ID of the Lv1 pigment item this generator produces
+
+Shade Transformation:
+- TransformMap: json — Map of {source_item_id + pigment_color} → output_item_id for all 32 combinations
+- OverwriteEnabled: bool — Allow applying pigment to already-shaded items (default: true)
+
+---
+
+# 9. User Flow
+
+High Level (8 steps):
+1. The user taps the Skincare Bag → receives Skincare Chain items (Lv1–Lv4), credits spent per tap.
+2. Occasionally a Pigment Drops generator (Pink, Red, or Purple) drops onto the board as a rare reward.
+3. The user merges Skincare items through 13 levels. At Lv13, the Glam Case auto-transforms into a Makeup Bag on the same tile — no user action.
+4. The user taps the Makeup Bag → receives Beige Makeup Chain items. Makeup Bag has a limited tap count.
+5. The user taps a Pigment Drops generator → receives a Lv1 color-specific Pigment item.
+6. The user drags a Pigment item onto any Makeup Chain item → Makeup item transforms in-place to that shade. Pigment consumed.
+7. When Makeup Bag hits its tap limit, it transforms into a Lv11 Skincare item (or disappears — TBD).
+8. Orders shown as board badges request specific Makeup items at specific shades. Completing them grants rewards.
+
+Tapping the Skincare Bag:
+- Credits deducted per GeneratorTapCost
+- One Skincare Chain item drops to a free adjacent tile, weighted by GenItemDropChance
+- Independent pigment drop roll fires against PigmentDropChance_[Color] for each color
+- If triggered: a Pigment Drops generator of that color spawns on a free board tile
+- If board full: generator drop is lost; standard "board full" toast shown
+
+Reaching Lv13 — Glam Case auto-transform:
+- Two Lv12 items (Expensive Under Eye Cream) merge → Glam Case appears on tile
+- System immediately and automatically converts Glam Case → Makeup Bag on the same tile
+- No animation delay; no user action required; Makeup Bag is immediately tappable
+
+Tapping the Makeup Bag:
+- Credits deducted per GeneratorTapCost
+- A Beige Makeup Chain item drops (Lv1–Lv4, weighted by GenItemDropChance)
+- Internal tap counter decrements by 1
+- When counter reaches 0: if ItemTransform is set → Makeup Bag replaced by configured Skincare item; if null → Makeup Bag disappears
+
+Drag-to-transform (Shade Transformation):
+- User picks up a Pigment item from the board
+- User drags it over a Makeup Chain item (any level, any current shade)
+- If drop is valid (target IS a Makeup Chain item): Makeup item replaced in-place by shaded variant at same level; Pigment item removed; click_beauty_chain_apply_pigment event fires
+- If drop is invalid (not a Makeup Chain item): Pigment item snaps back to origin tile
+
+Completing an order:
+- User drags target Makeup item (correct level + shade) to board badge order slot
+- Order completes → reward animation → reward flies to destination
+- rewards_beauty_chain_order event fires with standard reward common params
+
+---
+
+# 10. Analytics
+
+Existing events (no changes):
+- generation: fires for any generator tap (Skincare Bag, Makeup Bag, Pigment Drops). Key params: generator_id, generator_id_name, item_id_1, generator_capacity_left, free_tiles
+- merge: fires for any Skincare or Makeup Chain merge. Key params: item_id_1, item_id_1_level, item_id_1_chain, free_tiles
+
+New event: click_beauty_chain_apply_pigment
+Fires when a Pigment item is successfully dropped onto a Makeup Chain item.
+- click_id: string — Auto-generated UID
+- source_item_id: int — Makeup item ID before transformation
+- source_item_id_name: string — Makeup item name before transformation
+- source_item_level: int — Chain level (1–8)
+- source_shade: string — Shade before: beige, pink, purple, red
+- pigment_item_id: int — Pigment item ID used
+- pigment_color: string — Color applied: pink, purple, red
+- output_item_id: int — Resulting shaded item ID
+- output_item_id_name: string — Resulting item name
+- is_overwrite: bool (0/1) — 1 if source was already shaded
+- free_tiles: int — Free tiles after transformation
+
+New event: rewards_beauty_chain_order
+Fires when a Beauty Chain order is fulfilled.
+- item_id_1, item_id_1_name, item_quantity_1: standard reward params
+- reward_destination: string — reward_center or balance
+- order_item_id: int — Makeup item that fulfilled the order
+- order_shade: string — Shade fulfilled: beige, pink, purple, red
+- order_level: int — Chain level of fulfilled item
+- free_tiles: int
+
+Modifications to existing events:
+- impression_scapes: add is_beauty_chain_badge (bool 0/1) — whether a Beauty Chain order badge is active (v1 if badge ships)
+
+---
+
+# 11. Edge Cases
+
+- Board full when Pigment Drops generator drops: generator lost, standard toast, no retry
+- Board full when Makeup Bag would spawn from Glam Case: held in pending state, placed on first free tile — no loss
+- Same-level Makeup items, different shades: cannot merge (different item_id)
+- Pigment item dragged onto non-Makeup item: snaps back to origin, no consumption
+- Pigment item dragged onto Makeup item already matching that pigment's shade: fires anyway (idempotent), pigment consumed
+- App closed mid-drag of Pigment item: on resume, pigment returns to pre-drag position, no transformation
+- Skincare Bag tapped with board full (chain item): credits spent, item lost, standard toast
+- Makeup Bag GenLimit reached with Pigment items still on board: pigment items remain, generator transforms/disappears
+- Order expires while user holds target Makeup item: item returns to board, no credit granted
+
+---
+
+# 12. QA Test Cases
+
+28 seed cases across 6 modules. Full sheet: https://docs.google.com/spreadsheets/d/1aaxQOwE9OSOkbygNk9ZqHD_rTHlONkBBufRa-Vj4CG4 (tab: Dotan: Beauty Chain)
+
+Module coverage:
+- Flow 1 — Skincare Chain Progression: 5 cases, 3 Critical
+- Flow 2 — Glam Case → Makeup Bag Auto-Transform: 5 cases, 5 Critical
+- Flow 3 — Pigment Drops Generation: 4 cases, 3 Critical
+- Flow 4 — Shade Transformation: 7 cases, 6 Critical
+- Flow 5 — Order Fulfillment: 4 cases, 3 Critical
+- Flow 6 — Edge Cases & Board State: 3 cases, 2 Critical
+- Total: 28 cases, 22 Critical
+
+---
+
+# 13. Docs & Links
+
+- Full PRD on Notion: https://www.notion.so/349c2344a7dc8199bce8f6d040104757
+- Figma — User Flow: https://www.figma.com/design/dixrH4A2HZR8LmWBsZpl6A/
+- Reference: Tea Generator PRD: https://www.notion.so/46652ecab0f94f1695941b84016c550f
+- Reference: Kara's Fusion Fair PRD: https://www.notion.so/ba109eedde4640208af882264bdc9869
+- Assets path: Peerplay Art/04_Items/84_BeautyChain_SkincareMakeupPigment/Export/
+- QA Master Sheet: https://docs.google.com/spreadsheets/d/1aaxQOwE9OSOkbygNk9ZqHD_rTHlONkBBufRa-Vj4CG4`;
+
+const SYSTEM=`You are "The Brief" — a Q&A assistant for the Merge Cruise Beauty Chain PRD (Beauty Chain — Skincare × Makeup × Pigment).
+
+Your ONLY knowledge source is the PRD below. Answer based ONLY on what is in the PRD. If something is not covered, say "This isn't defined in the PRD" and suggest it may need to be added.
+
+Guidelines:
+- Be concise and clear
+- Use bullet points and short paragraphs
+- NEVER use markdown tables (pipes and dashes). Always use bullet lists or bold labels instead. Tables render badly in this chat UI.
+- Reference section numbers when relevant (e.g. "See Section 6")
+- If the answer involves a flow, walk through the steps briefly
+- Use **bold** for key terms and backticks for field names or event names
+- Keep answers focused — extract what's relevant, don't dump entire sections
+- When referencing a section within this PRD, do NOT use links. Just write "See **Section 6**" or "(Section 9)" in bold.
+- When referencing a separate document, use a clickable link:
+  - [Full PRD on Notion](https://www.notion.so/349c2344a7dc8199bce8f6d040104757)
+  - [QA Test Cases](https://docs.google.com/spreadsheets/d/1aaxQOwE9OSOkbygNk9ZqHD_rTHlONkBBufRa-Vj4CG4)
+  - [Figma User Flow](https://www.figma.com/design/dixrH4A2HZR8LmWBsZpl6A/)
+
+PRD:
+${PRD}`;
+
+let messages=[];
+let isTyping=false;
+
+function renderMarkdown(text){
+  return text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/`([^`]+)`/g,'<code>$1</code>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>')
+    .replace(/^### (.+)$/gm,'<h3>$1</h3>')
+    .replace(/^## (.+)$/gm,'<h3>$1</h3>')
+    .replace(/^# (.+)$/gm,'<h3>$1</h3>')
+    .replace(/^[-*] (.+)$/gm,'<li>$1</li>')
+    .replace(/(<li>.*<\/li>\n?)+/g,'<ul>$&</ul>')
+    .replace(/^\d+\. (.+)$/gm,'<li>$1</li>')
+    .replace(/\n\n/g,'</p><p>')
+    .replace(/\n/g,'<br>')
+    .replace(/^(?!<[hul]|<\/[hul]|<li|<\/li)(.+)$/gm,'<p>$1</p>');
+}
+
+function addMsg(role,text,streaming){
+  const chat=document.getElementById('chat');
+  const w=document.getElementById('welcome');
+  if(w)w.remove();
+  const ex=document.getElementById('examples-section');
+  if(ex)ex.style.display='none';
+  const g=document.createElement('div');
+  g.className='msg-group '+(role==='ai'?'ai':'user');
+  const av=document.createElement('div');
+  av.className='msg-avatar';
+  av.textContent=role==='ai'?'✨':'U';
+  if(role==='user'){av.style.cssText='background:#2d1a3e;color:#f5f0ff';}
+  const mc=document.createElement('div');
+  mc.className='msg-content';
+  if(role==='ai'){
+    mc.innerHTML=streaming?'':renderMarkdown(text);
+    if(streaming)mc.dataset.raw='';
+  } else {
+    mc.textContent=text;
+  }
+  g.appendChild(av);g.appendChild(mc);
+  chat.appendChild(g);
+  if(role==='ai'){
+    g.scrollIntoView({behavior:'smooth',block:'start'});
+  } else {
+    chat.scrollTop=chat.scrollHeight;
+  }
+  return g;
+}
+
+function showTyping(){
+  const chat=document.getElementById('chat');
+  const ind=document.createElement('div');
+  ind.className='typing-indicator';ind.id='typing';
+  const a=document.createElement('div');
+  a.className='msg-avatar';
+  a.style.cssText='background:linear-gradient(135deg,#2d1a3e,#7b3fa0);color:white;box-shadow:0 1px 2px rgba(0,0,0,0.04)';
+  a.textContent='✨';
+  const d=document.createElement('div');
+  d.className='typing-dots';
+  d.innerHTML='<span></span><span></span><span></span>';
+  ind.appendChild(a);ind.appendChild(d);chat.appendChild(ind);
+  chat.scrollTop=chat.scrollHeight;
+}
+function hideTyping(){const el=document.getElementById('typing');if(el)el.remove();}
+
+async function send(){
+  if(isTyping)return;
+  const input=document.getElementById('input');
+  const text=input.value.trim();
+  if(!text)return;
+  input.value='';
+  input.style.height='40px';
+  addMsg('user',text);
+  messages.push({role:'user',content:text});
+  isTyping=true;
+  document.getElementById('send-btn').disabled=true;
+  showTyping();
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'x-api-key':_d(_e,_k),'anthropic-version':'2023-06-01','content-type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:2048,system:SYSTEM,messages:messages.slice(-10)})
+    });
+    hideTyping();
+    if(!resp.ok){const e=await resp.text();throw new Error(e);}
+    const data=await resp.json();
+    const reply=data.content[0].text;
+    messages.push({role:'assistant',content:reply});
+    addMsg('ai',reply);
+  }catch(e){
+    hideTyping();
+    addMsg('ai','Sorry, something went wrong. Please try again.\n\n`'+e.message+'`');
+  }
+  isTyping=false;
+  document.getElementById('send-btn').disabled=false;
+  document.getElementById('input').focus();
+}
+
+function askExample(btn){
+  const input=document.getElementById('input');
+  input.value=btn.textContent;
+  send();
+}
+</script>
+</body>
+</html>
