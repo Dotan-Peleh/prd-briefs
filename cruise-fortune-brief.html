@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Brief — Cruise Fortune PRD</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎰</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f8f8f6;
+    --surface: #ffffff;
+    --text: #1a1a1a;
+    --text-secondary: #6b6b6b;
+    --text-muted: #9a9a9a;
+    --accent: #d94452;
+    --accent-soft: #fef2f2;
+    --user-bg: #1a1a2e;
+    --user-text: #f0f0f5;
+    --border: #e8e8e4;
+    --border-light: #f0f0ec;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 2px 8px rgba(0,0,0,0.06);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --radius-pill: 100px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg); color: var(--text);
+    height: 100vh; display: flex; flex-direction: column;
+    overflow: hidden; -webkit-font-smoothing: antialiased;
+  }
+  .header {
+    padding: 18px 28px; background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 14px; flex-shrink: 0; z-index: 10;
+  }
+  .header-icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #2d2d5e 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0; box-shadow: var(--shadow-md);
+  }
+  .header-brand {
+    font-family: 'Newsreader', serif; font-size: 18px; font-weight: 600;
+    color: var(--text); letter-spacing: -0.3px;
+  }
+  .header-brand em {
+    font-style: italic; color: var(--accent); font-weight: 400;
+  }
+  .header-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; letter-spacing: 0.2px; }
+  .header-status {
+    margin-left: auto; display: flex; align-items: center; gap: 6px;
+    font-size: 10px; color: var(--text-muted); letter-spacing: 0.4px; text-transform: uppercase;
+  }
+  .header-status .pulse {
+    width: 6px; height: 6px; border-radius: 50%; background: #22c55e;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.85); }
+  }
+  .chat {
+    flex: 1; overflow-y: auto; padding: 24px 28px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .chat::-webkit-scrollbar { width: 5px; }
+  .chat::-webkit-scrollbar-track { background: transparent; }
+  .chat::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .msg-group {
+    display: flex; gap: 10px; max-width: 88%;
+    animation: msgIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .msg-group.user { align-self: flex-end; flex-direction: row-reverse; }
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .msg-avatar {
+    width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; margin-top: 2px;
+  }
+  .msg-group.ai .msg-avatar {
+    background: linear-gradient(135deg, #1a1a2e, #3d3d7e);
+    color: white; box-shadow: var(--shadow-sm);
+  }
+  .msg-group.user .msg-avatar { background: var(--user-bg); color: var(--user-text); }
+  .msg-content {
+    padding: 13px 17px; border-radius: var(--radius);
+    line-height: 1.65; font-size: 13.5px;
+  }
+  .msg-group.ai .msg-content {
+    background: var(--surface); color: var(--text);
+    border: 1px solid var(--border-light); box-shadow: var(--shadow-sm);
+    border-top-left-radius: 4px;
+  }
+  .msg-group.user .msg-content {
+    background: var(--user-bg); color: var(--user-text);
+    border-top-right-radius: 4px;
+  }
+  .msg-group.ai .msg-content strong { color: var(--accent); font-weight: 600; }
+  .msg-group.ai .msg-content code {
+    background: #f5f5f0; padding: 1px 6px; border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: #8b5cf6; border: 1px solid var(--border-light);
+  }
+  .msg-group.ai .msg-content pre {
+    background: #fafaf8; padding: 12px 14px; border-radius: var(--radius-sm);
+    margin: 8px 0; overflow-x: auto; border: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace; font-size: 11.5px;
+    line-height: 1.7; color: var(--text);
+  }
+  .msg-group.ai .msg-content h3 {
+    font-family: 'Newsreader', serif; color: var(--text);
+    margin: 12px 0 5px; font-size: 14.5px; font-weight: 600;
+  }
+  .msg-group.ai .msg-content h3:first-child { margin-top: 0; }
+  .msg-group.ai .msg-content ul, .msg-group.ai .msg-content ol { padding-left: 18px; margin: 5px 0; }
+  .msg-group.ai .msg-content li { margin: 2px 0; }
+  .msg-group.ai .msg-content p { margin: 5px 0; }
+  .msg-group.ai .msg-content p:first-child { margin-top: 0; }
+  .msg-group.ai .msg-content p:last-child { margin-bottom: 0; }
+  .msg-group.ai .msg-content a {
+    color: var(--accent); text-decoration: none;
+    border-bottom: 1px solid rgba(217,68,82,0.3);
+    transition: border-color 0.2s;
+  }
+  .msg-group.ai .msg-content a:hover { border-bottom-color: var(--accent); }
+  .typing-indicator {
+    display: flex; gap: 10px; max-width: 88%;
+    animation: msgIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .typing-dots {
+    padding: 14px 18px; background: var(--surface);
+    border: 1px solid var(--border-light); border-radius: var(--radius);
+    border-top-left-radius: 4px; box-shadow: var(--shadow-sm);
+    display: flex; gap: 5px; align-items: center;
+  }
+  .typing-dots span {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--text-muted); animation: bounce 1.2s ease-in-out infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-5px); opacity: 1; }
+  }
+  .examples-section { padding: 0 28px 18px; flex-shrink: 0; }
+  .examples-label {
+    font-size: 10px; color: var(--text-muted); text-transform: uppercase;
+    letter-spacing: 0.8px; margin-bottom: 9px; font-weight: 500;
+  }
+  .examples { display: flex; gap: 7px; flex-wrap: wrap; }
+  .example-pill {
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text-secondary); border-radius: var(--radius-pill);
+    padding: 8px 16px; font-size: 12.5px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+  }
+  .example-pill:hover {
+    border-color: var(--accent); color: var(--accent);
+    background: var(--accent-soft); transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+  .input-area {
+    padding: 16px 28px 20px; background: var(--surface);
+    border-top: 1px solid var(--border); flex-shrink: 0;
+  }
+  .input-wrapper {
+    display: flex; gap: 10px; align-items: flex-end;
+    background: var(--bg); border: 1.5px solid var(--border);
+    border-radius: var(--radius); padding: 5px 5px 5px 15px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .input-wrapper:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(217,68,82,0.08); }
+  .input-wrapper textarea {
+    flex: 1; background: transparent; border: none; padding: 9px 0;
+    color: var(--text); font-size: 13.5px; resize: none; height: 40px;
+    max-height: 120px; font-family: 'DM Sans', sans-serif; line-height: 1.5;
+  }
+  .input-wrapper textarea:focus { outline: none; }
+  .input-wrapper textarea::placeholder { color: var(--text-muted); }
+  .send-btn {
+    background: var(--user-bg); color: white; border: none;
+    border-radius: var(--radius-sm); width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0; transition: all 0.2s ease;
+  }
+  .send-btn:hover { background: #2a2a4e; transform: scale(1.05); }
+  .send-btn:disabled { background: var(--border); cursor: not-allowed; transform: none; }
+  .send-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .welcome { text-align: center; padding: 32px 20px 16px; animation: fadeIn 0.5s ease both; }
+  .welcome-emoji { font-size: 32px; margin-bottom: 10px; }
+  .welcome h2 { font-family: 'Newsreader', serif; font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .welcome h2 em { font-style: italic; color: var(--accent); font-weight: 400; }
+  .welcome p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; max-width: 400px; margin: 0 auto; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  @media (max-width: 600px) {
+    .header { padding: 14px 18px; }
+    .chat { padding: 18px; }
+    .examples-section { padding: 0 18px 14px; }
+    .input-area { padding: 12px 18px 16px; }
+    .msg-group { max-width: 94%; }
+    .msg-avatar { width: 26px; height: 26px; font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-icon">&#x1F3B0;</div>
+  <div>
+    <div class="header-brand">The Brief <em>by PeerPlay</em></div>
+    <div class="header-sub">Cruise Fortune PRD &middot; Personal Offers template</div>
+  </div>
+  <div class="header-status"><div class="pulse"></div>Online</div>
+</div>
+<div id="chat" class="chat">
+  <div class="welcome" id="welcome">
+    <div class="welcome-emoji">&#x1F3B0;</div>
+    <h2>The Brief</h2>
+    <p>Ask anything about the Cruise Fortune PRD and get instant answers.</p>
+  </div>
+</div>
+<div class="examples-section" id="examples-section">
+  <div class="examples-label">Try asking</div>
+  <div class="examples">
+    <button class="example-pill" onclick="askExample(this)">What's the difference between CF Tokens and Prize Tokens?</button>
+    <button class="example-pill" onclick="askExample(this)">How do users earn CF Tokens from gameplay?</button>
+    <button class="example-pill" onclick="askExample(this)">When does the Grand Prize unlock?</button>
+    <button class="example-pill" onclick="askExample(this)">What happens on recompletion?</button>
+    <button class="example-pill" onclick="askExample(this)">How is this different from Rolling Offer?</button>
+  </div>
+</div>
+<div class="input-area">
+  <div class="input-wrapper">
+    <textarea id="input" placeholder="Ask anything about the Cruise Fortune PRD..." rows="1"
+      oninput="this.style.height='40px';this.style.height=Math.min(this.scrollHeight,120)+'px'"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send()}"></textarea>
+    <button class="send-btn" id="send-btn" onclick="send()">
+      <svg viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
+    </button>
+  </div>
+</div>
+<script>
+const _e="Pg5fBgs3XxQZGlVwQQpELTgXPDIGb0RldFZFDhx0FhoYHDElBjtBVREuEzZBeVsEel1ELyovCgE4AAAtWDkFXSokEzNeZkh4fSE4Vw4BNzsRISsgXQMUCDsDLFZxW3hZCVAFSj85ICInBCQC";
+const _k="MergeCruiseCloudSave2026";
+function _d(e,k){const b=atob(e);let r='';for(let i=0;i<b.length;i++)r+=String.fromCharCode(b.charCodeAt(i)^k.charCodeAt(i%k.length));return r;}
+
+const PRD_URL="https://www.notion.so/348c2344a7dc8155a704de004502ac6c";
+const PRD=`# Cruise Fortune (rolling with tokens) — PRD v1.2
+
+Status: Draft | Version: 1.3 | Author: Dotan | Date: 2026-04-21
+Type: Personal Offer template (cruise_fortune) | Two-resource collection mechanic
+
+Built on the Personal Offers system as a new template type — "cruise_fortune".
+
+---
+
+# 1. Background & Context
+
+Cruise Fortune is a new Personal Offers template type that layers a two-resource collection mechanic on top of the existing Rolling Offer structure.
+
+Two new skinnable resources per event run:
+- CF Token (e.g. anchor, gem) — shown top-left of popup. Earned from gameplay (timed tasks, injection tasks, feature rewards). Spent as payment on token-cost deals.
+- Prize Token (e.g. pearl, cup) — shown above each deal tile. Earned by claiming any deal. Accumulates toward the Grand Prize counter.
+
+When the user collects enough Prize Tokens, the Grand Prize unlocks.
+
+Built on: Personal Offers system (template_type = "cruise_fortune"). Inherits all offer infrastructure: triggers, lobby badge, purchase flow, timer, CDN, configuration.
+
+What's new vs Rolling Offer:
+- CF Token: skinnable event currency earned from gameplay, used to pay for token-cost deals
+- Prize Token: earned per deal claim (shown above each tile), fills the Grand Prize counter
+- Grand Prize panel (right side, always visible) with 0 / threshold Prize Token counter
+- New deal type: token_cost — unlocked by spending CF Tokens instead of real money
+
+Reference: Disney Solitaire — Gingerbread Trail (gingerbread = payment token, cup = prize token, 0/60 counter), Ocean Fortune (gem = payment token, pearl = prize token, 0/100 counter).
+
+---
+
+# 2. MIAMI
+
+- Motivation: Rolling Offer only engages paying users. Cruise Fortune gives every player — spender or not — a reason to open and return to the offer.
+- Achievements: ARPDAU lift per event day; Grand Prize claim rate; share of DAU who earn ≥1 CF Token from gameplay.
+- Illustration: Disney Solitaire — Gingerbread Trail (gingerbread tokens + cup counter), Ocean Fortune (gem tokens + pearl counter).
+- Integrations: Personal Offers (base), Timed Board Tasks, Injection Board Tasks, Feature Rewards, Lobby Badge, CDN.
+- Risks: CF Token yield from gameplay too low → free players feel blocked on token-cost deals. Mitigate: calibrate so ~3 timed tasks cover 2 token-cost deals.
+- Innovation: Two-resource system. CF Tokens drive gameplay engagement; Prize Tokens drive deal-claiming behavior. Both are skinnable. Grand Prize always visible — every player sees exactly what they're working toward.
+
+---
+
+# 3. Goals
+
+- Give non-spenders a reason to engage with the offer through gameplay token earning and token-cost deals.
+- Drive deal claims across all player types (free, token-spend, paying).
+- Improve ARPDAU versus standard Rolling Offer during the event window.
+- Make the Grand Prize feel reachable — the counter should visibly fill with each claim.
+
+---
+
+# 4. MVP Scope
+
+In v1:
+- CF Token (skinnable, earned from gameplay, spent on token-cost deals)
+- Prize Token (skinnable, earned per deal claim, fills Grand Prize counter)
+- Snake grid with token_cost deal type
+- Grand Prize panel (right side, always visible, Prize Token counter)
+- Lobby badge (CF Token icon + timer)
+- Recompletion support
+
+In v2:
+- Support getting CF Tokens from board generations and self-collectables
+- Multiple Grand Prize tiers
+
+---
+
+# 5. Core Concepts
+
+- CF Token: The skinnable PAYMENT resource. Shown top-left as a balance (persistent while popup is open). Earned from gameplay. Spent to unlock token-cost deals. Think: gingerbread man, anchor gem.
+- Prize Token: The skinnable COLLECTION resource. Shown above each deal tile (e.g. ×3, ×6). Earned by claiming any deal. Accumulates toward the Grand Prize counter. Think: hot chocolate cup, pearl.
+- Grand Prize counter: X / threshold shown at the bottom of the Grand Prize panel. Counts Prize Tokens collected this cycle.
+- Token-cost deal: A deal that costs CF Tokens to unlock, instead of real money.
+- Grand Prize: Large reward bundle on the right side of the popup. Unlocks when Prize Token counter hits the threshold. Always visible with "FREE" ribbon.
+- CF Token balance: How many CF Tokens the user has available to spend. Shown top-left while popup is open. Outside the popup: appears briefly when tokens are granted, then disappears.
+- Cycle: One run from 0 Prize Tokens to Grand Prize claim. On recompletion: cycle++, Prize Token counter resets to 0, deals reset, CF Token balance carries forward.
+
+---
+
+# 6. The Offer Window
+
+## Layout
+
+The popup contains:
+- Header bar with title "CRUISE FORTUNE — COLLECT ALL Prize Tokens TO WIN THE GRAND PRIZE", CF Token balance top-left, SALE badge, close button.
+- Snake-pattern deal grid (left side). Each tile shows Prize Token yield above and a cost button below (Free / X CF Tokens / $price).
+- Grand Prize panel (right side, always visible). Reward preview, Prize Token counter X / threshold, FREE ribbon.
+- Timer at the bottom of the popup.
+
+CF Token = payment token (top-left balance).
+Prize Token = collection token (above tiles + Grand Prize counter).
+
+## UI Elements
+
+- CF Token balance: persistent while popup is open. Outside popup it appears briefly when tokens are granted, then disappears. Location: Top-left.
+- Prize Token yield badge: Prize Tokens earned per deal claim. Location: Above each tile.
+- Cost button: Free, X CF Tokens, or $price. Location: Bottom of each tile.
+- Lock icon: Unavailable deals. Location: Bottom of locked tiles.
+- Grand Prize counter: Prize Tokens collected / threshold. Location: Grand Prize panel.
+- Grand Prize panel: Always-visible reward preview + Prize Token counter. Location: Right side.
+- Timer: Event countdown. Location: Bottom of popup.
+
+## Snake Pattern
+
+Identical to Rolling Offer. sub_offer_id determines order; odd rows go left→right, even rows go right→left. Screen scrolls to next row when last deal in a row is claimed.
+
+---
+
+# 7. User Flow
+
+This is the single source of truth for Cruise Fortune behavior. All other sections reference it.
+
+## Flow at a Glance
+
+1. Activation — Login → Prize Token counter = 0, badge appears.
+2. Popup opens — Standard Personal Offers popup stream — same as Rolling Offer.
+3. Claiming deals — Any claim (free / token-cost / paid) earns Prize Tokens → Grand Prize counter fills.
+4. Earning CF Tokens from gameplay — Board tasks → CF Token balance appears, tokens fly to it, disappears (or updates in-popup balance).
+5. Grand Prize unlocks — Prize Token counter hits threshold → panel glows, CLAIM! appears.
+6. Claim Grand Prize — Tap CLAIM! → celebration → rewards fly → recompletion or complete.
+7. All deals claimed before threshold — Sequence resets (if configured) or only gameplay path remains.
+8. Event ends — Timer hits 0 → badge gone, both resources expire, Grand Prize NOT auto-granted.
+
+## Detailed Steps
+
+### 1. Activation
+On login, the system checks: chapter gate met, timer active, purchase cap not reached. If eligible: config_segment locked for full duration, cycle = 0, prize_tokens_collected = 0, deal sequence starts at sub_offer_id 1. CF Token balance may already be > 0 if the user earned tokens from gameplay before opening the popup. If not eligible, nothing is shown.
+
+### 2. The Offer Popup
+Appears in the standard Personal Offers popup stream — same hierarchy as Rolling Offer. First display per session: if deals don't fit on screen, a quick bottom-to-top scroll reveals all deals (once per session). The user sees:
+- Header: "CRUISE FORTUNE — COLLECT ALL Prize Tokens TO WIN THE GRAND PRIZE"
+- CF Token balance (top-left) — persistent while popup is open
+- Snake deal grid: deal 1 glowing, rest locked
+- Grand Prize panel (right): full reward preview, Prize Token counter at 0 / threshold, "FREE" ribbon
+- Timer at bottom
+
+On re-open via badge tap: resumes where left off, no scroll animation.
+
+### 3. Claiming a Deal
+Every deal tile shows:
+- Above: Prize Token yield badge (×N) — earned by claiming this deal.
+- Below: Cost button — Free, X CF Tokens, or $price.
+
+After any successful claim: chest opens, rewards fly to destinations, Prize Tokens fly to the Grand Prize counter, counter animates up, next deal unlocks.
+
+Free deal — Tap "Free" → collect popup → tap anywhere → rewards + Prize Tokens fly → next deal unlocks.
+
+Token-cost deal, has enough CF Tokens — Cost button active. Tap → CF Tokens deducted from balance (top-left decreases) → same collect flow. Prize Tokens are still earned and counted toward Grand Prize. Spending CF Tokens does NOT reduce the Prize Token counter — they are independent resources.
+
+Token-cost deal, not enough CF Tokens — Button greyed out. "Earn X more CF Tokens." Deal is blocked — deals are sequential, cannot skip. Must earn CF Tokens from gameplay first.
+
+Paid deal, confirmed — Tap price → standard purchase flow → "Purchase Successful!" collect popup → rewards + Prize Tokens fly → next deal unlocks.
+
+Paid deal, failed/cancelled — purchase_failed fires. Deal stays available.
+
+### 4. Earning CF Tokens from Gameplay
+CF Tokens arrive from gameplay while the event is ACTIVE:
+- Timed board task completed → CF Token balance appears on screen, tokens fly to it, then balance disappears. If popup is open, the balance simply updates in real-time top-left.
+- Injection board task completed.
+- Other LiveOps feature reward → if the reward bundle includes cf_token_item_id, tokens arrive the same way.
+
+CF Tokens wait in the balance until spent on a token-cost deal.
+
+### 5. Grand Prize Unlocks
+Popup open — Grand Prize panel pulses golden. "CLAIM!" button appears. User can claim now or keep claiming more deals (more Prize Tokens = faster next cycle if recompletable).
+
+Popup closed — Lobby badge pulses. No auto-popup. User taps badge → popup opens with Grand Prize ready.
+
+### 6. Claiming the Grand Prize
+User taps "CLAIM!" → click_cruise_fortune_grand_prize_claim fires → celebration animation → Grand Prize rewards fly → rewards_cruise_fortune_grand_prize fires.
+
+Not recompletable (or cap reached) — Popup closes. Badge disappears on next lobby visit. Event → COMPLETED.
+
+Recompletable — Recompletion popup (no close button, "Continue" only — identical to Rolling Offer). User taps Continue: Prize Token counter → 0, deals reset to position 1, CF Token balance STAYS, cycle++, is_recompletion = 1 on all future events.
+
+### 7. All Deals Claimed Before Threshold
+- reset_sequence_on_completion = true (default): deals reset to deal 1 — same as Rolling Offer cycling.
+- reset_sequence_on_completion = false: all deals show claimed. Grand Prize panel: "Keep claiming deals to earn more Prize Tokens!"
+
+### 8. Event Ends
+Normal end — Timer hits 0. Popup closes. Badge disappears. Both CF Token balance and Prize Token counter expire. Grand Prize NOT auto-granted even if unlocked.
+
+End-of-event reminder — If show_end_of_event_reminder = true, Prize Token counter ≥ 80% threshold, Grand Prize not claimed: reminder popup on next game open. "Only X away — Y hours left!" with "Open Offer" CTA.
+
+Timer expires mid-claim — Grand Prize CLAIMING in progress → claim completes in full first, then event ends.
+
+---
+
+# 8. How Resources Work
+
+## The Two Resources
+
+CF Token (anchor / gem):
+- Earned from gameplay: timed tasks, injection tasks, feature rewards.
+- Used for paying for token-cost deals.
+- Shown top-left balance (persistent in popup; transient outside).
+
+Prize Token (pearl / cup):
+- Earned by claiming any deal (free, token-cost, or paid).
+- Used for filling the Grand Prize counter.
+- Shown above each tile + Grand Prize counter.
+
+## Key Rules
+- Claiming any deal always earns Prize Tokens — even token-cost deals. The two resources are completely independent.
+- CF Token balance reduces on spending. Prize Token counter only ever increases.
+- On recompletion: Prize Token counter → 0. CF Token balance carries forward.
+- On event end: both expire. No carryover.
+
+## Example
+User earns 30 CF Tokens from gameplay. Opens the offer:
+1. Claims free deal (×5 Prize Tokens) → CF balance = 30, Prize counter = 5.
+2. Spends 5 CF Tokens on token-cost deal (×8 Prize Tokens) → CF balance = 25, Prize counter = 13.
+3. Buys paid deal (×10 Prize Tokens) → CF balance = 25, Prize counter = 23.
+
+---
+
+# 9. Lobby Badge
+
+Same as all Personal Offers lobby badges:
+- Background art: CDN-configured per event run.
+- CF Token icon: Skinnable payment token art.
+- Timer: Countdown to event end.
+
+impression_scapes modification: is_cruise_fortune_lobby_badge (int, 0/1).
+
+---
+
+# 10. Popups
+
+- Cruise Fortune offer popup — Same hierarchy as Rolling Offer, standard login stream or badge tap. Snake grid + Grand Prize panel. Standard Personal Offers opening animation.
+- Deal collect popup — Free or token-cost deal claimed. Identical to Rolling Offer collect popup. "Tap to Collect."
+- Purchase rewards popup — Paid deal confirmed. Identical to store purchase popup. "Purchase Successful!"
+- Recompletion popup — Grand Prize claimed + recompletable. Identical to Rolling Offer recompletion. No close button. "Continue" CTA only.
+- End-of-event reminder — Event ending soon; Prize Token counter ≥ 80%; Grand Prize not claimed. "Only X away — Y hours left!"
+
+---
+
+# 11. Rewards
+
+## Deal Rewards
+Each deal: up to 3 reward items + Prize Token yield (Prize Token yield shown above tile, not a reward slot).
+
+Reward destinations (R2):
+- Credits → balance meter
+- Items, boosters, chests → Reward Center
+- Album packs → album icon
+- Prize Tokens → Grand Prize counter
+- CF Tokens → CF Token balance (persistent in popup; transient outside)
+
+## Grand Prize Rewards
+- Up to 3 items. display_currency sets which currency shows amount prominently.
+- Always "FREE" ribbon. No extra purchase required.
+
+## Chest Rewards
+chest_taps + chest_credits_per_tap per deal. Total = taps × credits_per_tap (R7).
+
+---
+
+# 12. Purchase Flow
+
+Identical to Personal Offers (PU1–PU4):
+click_cruise_fortune_deal_buy → impression_store → purchase_click → purchase_native_popup_impression → purchase_successful / purchase_failed → rewards_store
+
+package_type = "cruise_fortune" on all purchase events (PU3). Free and token-cost deals do NOT trigger purchase events.
+
+---
+
+# 13. CDN / Reskin
+
+Both tokens are skinnable per event run:
+- cf_popup_top — Dynamic top element (same as Rolling Offer). Fallback: default cruise art.
+- cf_badge_bg — Lobby badge background. Fallback: default badge.
+- cf_spend_token_icon — CF Token art (payment, shown top-left + cost buttons). Fallback: default gem icon.
+- cf_prize_token_icon — Prize Token art (collection, shown above tiles + Grand Prize counter). Fallback: default pearl icon.
+- cf_grand_prize_panel — Grand Prize panel background art. Fallback: default treasure pile.
+
+3 retries on CDN failure → use defaults, never block feature (C2). Background retry at 30s (C3). Version validated via cdn_version (C4). No mid-cycle skin change (C1).
+
+---
+
+# 14. LiveOps Configuration
+
+Non-sticky config — ability to change and fix configs even after publish.
+
+## 1. Basic Parameters
+- live_ops_id (int)
+- offer_id (int)
+- template_type ("cruise_fortune") NEW
+- purchase_limit (int)
+- background_asset_path (string) — CDN path for popup top element
+- badge_asset_path (string) — CDN path for lobby badge
+- cf_token_item_id (int) NEW — Catalog item_id for the CF Token (payment token)
+- cf_token_item_name (string) NEW — e.g. "Anchor", "Gem"
+- prize_token_item_id (int) NEW — Catalog item_id for the Prize Token (collection token)
+- prize_token_item_name (string) NEW — e.g. "Pearl", "Cup"
+- grand_prize_threshold (int) NEW — Prize Tokens needed to unlock Grand Prize
+- timed_task_token_bonus (int) NEW — CF Tokens per timed task completion (default: 5)
+- injection_task_token_bonus (int) NEW — CF Tokens per injection task completion (default: 3)
+- show_end_of_event_reminder (bool) NEW — Show urgency popup when ≥ 80% threshold near end (default: true)
+- reset_sequence_on_completion (bool) NEW — Reset deal sequence when all deals claimed before threshold (default: true)
+- cdn_skin_id (string) NEW
+- cdn_version (string) NEW
+
+Note: There's no dependency between an SKU and the contents of a deal. The same store SKU can be configured with different contents — even in the same offer.
+
+## 2. Content Parameters
+
+grand_prize: { item_id_1, item_id_1_quantity, item_id_2, item_id_2_quantity, item_id_3, item_id_3_quantity, display_currency }
+
+sequence: array of deals. Each deal has:
+- sub_offer_id (int)
+- type: "free" | "token_cost" | "paid"
+- prize_token_yield (int)
+- For token_cost: cf_token_cost (int)
+- For paid: sku_ios, sku_gp
+- contents: { item_id_1, item_id_1_quantity, item_id_2, item_id_2_quantity, ... }
+
+## Changing the Config When Live
+When removing or modifying a Cruise Fortune config in production, users lose deal progress and CF Token balance. Two compensations are needed:
+1. Position compensation: ability to send the user back to a specific sub_offer_id in the deal sequence — same mechanism as Rolling Offer mass compensation.
+2. CF Token balance compensation: ability to restore the user's CF Token balance — TBD.
+
+Mass compensation mechanism: TBD.
+
+---
+
+# 15. Segmentation
+
+Source: config_segment from offer config tags. Resolution: ONCE at event start, LOCKED (S1).
+
+Segmentable:
+- grand_prize_threshold — lower for newer players
+- Grand Prize reward contents — higher value for high-spend
+- Deal sequence (yields, costs, types)
+
+NOT segmentable:
+- CF Token art + Prize Token art — same skin for all segments in a run
+
+Segment naming: default, above_chapter_12, high_spend_ch_12_35, etc.
+
+---
+
+# 16. State Machine
+
+- INACTIVE — Event not started or user not eligible.
+- ACTIVE — Popup accessible, CF Tokens accumulating, Prize Tokens earned per claim.
+- GRAND_PRIZE_UNLOCKED — Prize Token counter ≥ threshold; CLAIM! button visible.
+- CLAIMING — User tapped CLAIM!; server validating, rewards delivering.
+- COMPLETED — Grand Prize claimed; not recompletable or cap reached.
+- CYCLE_RESET — Transient: cycle++, Prize Token counter → 0, deals reset → back to ACTIVE (CF Token balance preserved).
+
+Guarantees: No skipped states (SM1). Timer expiry during CLAIMING → finish claim first (SM2). Grand Prize server-validated before state transition (SM3). Duplicate claims idempotent (SM4). Recompletion: Prize Token counter resets, CF Token balance carries forward (SM5 variant).
+
+---
+
+# 17. Analytics
+
+## Feature Properties (on ALL cf_ events)
+- liveops_id (int) — LiveOps instance ID
+- offer_id (int) — Offer ID
+- segment_id (string) — Resolved segment
+- cycle (int) — Cycle index (0-based)
+- is_recompletion (int 0/1) — 1 if cycle > 0
+- cf_token_balance (int) — CF Token spendable balance
+- cf_prize_tokens_collected (int) — Prize Tokens collected this cycle
+- cf_prize_threshold (int) — Prize Token threshold for Grand Prize
+
+## Modifications to Existing Events
+- is_cruise_fortune_lobby_badge (0/1) → impression_scapes
+- package_type = "cruise_fortune" → all purchase_* events
+- offer_type = "cruise_fortune" → impression_offer_popup, rewards_store
+
+## Snapshot (R10)
+On impression_offer_popup (offer_type = "cruise_fortune") and impression_scapes (is_cruise_fortune_lobby_badge = 1):
+
+Includes cf_token_balance, cf_prize_tokens_collected, cf_prize_threshold, cf_cycle, cf_grand_prize_claimed, liveops_id, segment_id, cf_array_deals (one string per deal with type, costs, yield, items, quantities), and presented_offers (currently visible deals with sub_offer_id, type, currency, original_price, sku).
+
+## Events
+- impression_offer_popup — CF popup opens. Params: offer_type = "cruise_fortune", sub_offer_id, snapshot.
+- click_offer_badge — User taps lobby badge. Params: liveops_id, offer_id.
+- click_cruise_fortune_collect — Free or token-cost deal claimed. Params: offer_id, sub_offer_id, deal_type, prize_token_yield, cf_token_cost.
+- rewards_cruise_fortune_collect — Deal rewards delivered. Params: offer_id, sub_offer_id, reward common params.
+- impression_cruise_fortune_grand_prize_unlocked — Prize Token counter hits threshold.
+- click_cruise_fortune_grand_prize_claim — User taps CLAIM!. Params: click_id.
+- rewards_cruise_fortune_grand_prize — Grand Prize rewards delivered. Params: reward common params, reward_destination.
+- impression_cruise_fortune_end_of_event_popup — End-of-event reminder. Params: prize_tokens_remaining, prize_tokens_needed.
+- rewards_cruise_fortune_cf_token — CF Tokens earned from gameplay. Params: token_source (timed_task / injection_task / feature_reward), cf_token_yield, reward common params.
+
+---
+
+# 18. Edge Cases
+
+- Token-cost deal, user has 0 CF Tokens — Button greyed out. "Earn X more." Cannot skip.
+- User earns CF Tokens while popup open — Balance updates real-time top-left. No animation interruption.
+- User earns CF Tokens while popup closed — Balance appears on screen, tokens fly to it, disappears.
+- Prize Token counter hits threshold, popup closed — Lobby badge pulses. No auto-popup.
+- All deals claimed, threshold not reached, reset_sequence_on_completion = false — Only CF Token earning from gameplay can enable more token-cost deal claims if sequence resets.
+- App closes during paid deal purchase — Store restore validates on next open. Prize Tokens granted on deal confirm.
+- Grand Prize UNLOCKED but user doesn't claim before event ends — Not auto-granted. Both resources expire.
+- Timer expires during CLAIMING — Claim completes fully first, then event ends.
+- CDN fails to load either token icon — Opens with default art. Never blocked.
+- Injection task completed before CF event starts — No bonus. Only active while ACTIVE.
+- Device offline during Grand Prize claim — State stays CLAIMING. Confirmed on reconnect.
+- Two CF events configured simultaneously — Use highest live_ops_id. Log error.
+
+---
+
+# 19. Sync & Persistence
+
+Per-user state:
+- offer_id, liveops_id, segment_id
+- cf_token_balance — spendable balance
+- cf_prize_tokens_collected — Grand Prize progress this cycle
+- deals_claimed[] — claimed sub_offer_ids
+- grand_prize_claimed — bool
+- cycle — current cycle
+- state — current offer state
+
+Rules: Server-authoritative. CF Token grants from gameplay pushed server-side. Grand Prize claim server-validated. Offline: popup viewable, claiming requires connectivity. Reconnect: pending CF Token grants applied additively, no clawbacks (PR2).
+
+---
+
+# 20. Docs & Links
+
+- Base system: Personal Offers System (Notion)
+- Competitive reference: Disney Solitaire — Gingerbread Trail, Ocean Fortune
+- Figma: TBD
+- Jira: TBD
+- QA Sheet: Master QA Sheet
+
+---
+
+# 21. QA Test Cases
+
+35 test cases across 5 modules. Tab: "Dotan: Cruise Fortune" in master QA sheet.
+
+Coverage Summary:
+- Module 1 — CF Token Earning (gameplay sources): 8 cases, 7 Critical
+- Module 2 — Deal Claiming & Prize Token Collection: 10 cases, 8 Critical
+- Module 3 — Grand Prize Unlock & Claim: 7 cases, 6 Critical
+- Module 4 — Recompletion & Cycle Reset: 5 cases, 4 Critical
+- Module 5 — Edge Cases, Network & Recovery: 5 cases, 3 Critical
+- Total: 35 cases, 28 Critical
+`;
+
+const SYSTEM=`You are "The Brief" \u2014 a Q&A assistant for the Merge Cruise Cruise Fortune PRD (Personal Offers template).
+
+Your ONLY knowledge source is the PRD below. Answer based ONLY on what is in the PRD. If something is not covered, say "This isn't defined in the PRD" and suggest it may need to be added.
+
+Guidelines:
+- Be concise and clear
+- Use bullet points and short paragraphs
+- NEVER use markdown tables (pipes and dashes). Always use bullet lists or bold labels instead. Tables render badly in this chat UI.
+- Reference section numbers when relevant (e.g. "See Section 5")
+- If the answer involves a flow, walk through the steps briefly
+- Use **bold** for key terms and backticks for field names or event names
+- Keep answers focused \u2014 extract what's relevant, don't dump entire sections
+- When referencing a section within this PRD, do NOT use links. Just write "See **Section 5**" or "(Section 6.2)" in bold. The user can search in Notion with Ctrl+F.
+- When referencing a SEPARATE document, use a clickable link:
+  - [Full PRD on Notion](https://www.notion.so/348c2344a7dc8155a704de004502ac6c)
+
+PRD:
+${PRD}`;
+
+let messages=[];
+let isTyping=false;
+
+function askExample(btn){document.getElementById('input').value=btn.textContent;send();}
+
+function fmt(text){
+  text=text.replace(/```(\w*)\n([\s\S]*?)```/g,'<pre><code>$2</code></pre>');
+  // Parse markdown tables before other formatting
+  text=text.replace(/((?:^\|.+\|$\n?)+)/gm, function(tableBlock){
+    const rows=tableBlock.trim().split('\n').filter(r=>r.trim());
+    if(rows.length<2) return tableBlock;
+    const isSep=r=>/^\|[\s\-:|]+\|$/.test(r.trim());
+    const dataRows=rows.filter(r=>!isSep(r));
+    if(dataRows.length===0) return tableBlock;
+    let html='<table style="width:100%;border-collapse:collapse;margin:8px 0;font-size:12.5px">';
+    dataRows.forEach((row,i)=>{
+      const cells=row.split('|').filter((c,j,a)=>j>0&&j<a.length);
+      const tag=i===0?'th':'td';
+      const bg=i===0?'background:#f5f5f0;font-weight:600;':'';
+      html+='<tr>';
+      cells.forEach(c=>{
+        html+='<'+tag+' style="padding:6px 10px;border:1px solid #e8e8e4;'+bg+'">'+c.trim()+'</'+tag+'>';
+      });
+      html+='</tr>';
+    });
+    html+='</table>';
+    return html;
+  });
+  text=text.replace(/`([^`]+)`/g,'<code>$1</code>');
+  text=text.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  text=text.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
+  text=text.replace(/^### (.+)$/gm,'<h3>$1</h3>');
+  text=text.replace(/^## (.+)$/gm,'<h3>$1</h3>');
+  text=text.replace(/^- (.+)$/gm,'<li>$1</li>');
+  text=text.replace(/(<li>[\s\S]*?<\/li>)/g,function(m){return '<ul>'+m+'</ul>';});
+  text=text.replace(/<\/ul>\s*<ul>/g,'');
+  text=text.replace(/^\d+\. (.+)$/gm,'<li>$1</li>');
+  text=text.replace(/\n\n/g,'</p><p>');
+  text='<p>'+text+'</p>';
+  text=text.replace(/<p><\/p>/g,'');
+  text=text.replace(/<p>(<h3>|<ul>|<ol>|<pre>|<table)/g,'$1');
+  text=text.replace(/(<\/h3>|<\/ul>|<\/ol>|<\/pre>|<\/table>)<\/p>/g,'$1');
+  return text;
+}
+
+function addMsg(role,text){
+  const chat=document.getElementById('chat');
+  const g=document.createElement('div');
+  g.className='msg-group '+(role==='user'?'user':'ai');
+  const a=document.createElement('div');
+  a.className='msg-avatar';
+  if(role==='user'){a.textContent='\u{1F464}';}
+  else{a.textContent='\u2728';a.style.cssText='background:linear-gradient(135deg,#1a1a2e,#3d3d7e);color:white;box-shadow:0 1px 2px rgba(0,0,0,0.04)';}
+  const c=document.createElement('div');
+  c.className='msg-content';
+  c.innerHTML=role==='user'?text.replace(/</g,'&lt;').replace(/>/g,'&gt;'):fmt(text);
+  g.appendChild(a);g.appendChild(c);chat.appendChild(g);
+  requestAnimationFrame(()=>{
+    if(role==='ai'){
+      g.scrollIntoView({behavior:'smooth',block:'start'});
+    } else {
+      chat.scrollTop=chat.scrollHeight;
+    }
+  });
+  return g;
+}
+
+function showTyping(){
+  const chat=document.getElementById('chat');
+  const ind=document.createElement('div');
+  ind.className='typing-indicator';ind.id='typing';
+  const a=document.createElement('div');
+  a.className='msg-avatar';
+  a.style.cssText='background:linear-gradient(135deg,#1a1a2e,#3d3d7e);color:white;box-shadow:0 1px 2px rgba(0,0,0,0.04)';
+  a.textContent='\u2728';
+  const d=document.createElement('div');
+  d.className='typing-dots';
+  d.innerHTML='<span></span><span></span><span></span>';
+  ind.appendChild(a);ind.appendChild(d);chat.appendChild(ind);
+  chat.scrollTop=chat.scrollHeight;
+}
+function hideTyping(){const el=document.getElementById('typing');if(el)el.remove();}
+
+async function send(){
+  if(isTyping)return;
+  const input=document.getElementById('input');
+  const text=input.value.trim();
+  if(!text)return;
+  input.value='';input.style.height='40px';
+  const w=document.getElementById('welcome');if(w)w.style.display='none';
+  const ex=document.getElementById('examples-section');if(ex)ex.style.display='none';
+  addMsg('user',text);
+  messages.push({role:'user',content:text});
+  const btn=document.getElementById('send-btn');
+  btn.disabled=true;isTyping=true;showTyping();
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':_d(_e,_k),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:2048,system:SYSTEM,messages:messages.slice(-10)})
+    });
+    hideTyping();
+    if(!resp.ok){const err=await resp.json();addMsg('ai','Sorry, I encountered an error: '+(err.error?.message||'Request failed.'));messages.pop();}
+    else{const data=await resp.json();const answer=data.content[0].text;addMsg('ai',answer);messages.push({role:'assistant',content:answer});}
+  }catch(e){hideTyping();addMsg('ai','Connection error. Please check your internet and try again.');messages.pop();}
+  btn.disabled=false;isTyping=false;input.focus();
+}
+</script>
+</body>
+</html>
